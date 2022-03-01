@@ -35,13 +35,11 @@ class Hand:
         """
         if (move_type == "h" and self.alive_fingers == 0) or num_fingers == 0:
             return False
-        elif num_fingers + self.alive_fingers >= self.total_fingers:
-            self.is_alive = False
-            self.alive_fingers = 0
-            return True
-        else:
-            self.alive_fingers = self.alive_fingers + num_fingers
-            return True
+
+        self.alive_fingers = (self.alive_fingers + num_fingers) % self.total_fingers
+        if not self.alive_fingers:
+            self.is_alive = False      
+        return True
 
 class Player(ABC):
     """Abstract class for players in the game"""
