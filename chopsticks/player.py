@@ -42,10 +42,18 @@ class Hand:
         return True
 
 class Player(ABC):
+
+    _next_player = 1
+
+    def get_next_player():
+        next = Player._next_player
+        Player._next_player += 1
+        return next
+
     """Abstract class for players in the game"""
-    def __init__(self, player_id, num_hands, num_fingers):
+    def __init__(self, num_hands, num_fingers):
+        self.id = Player.get_next_player()
         self.hands = [Hand(num_fingers) for x in range(num_hands)]
-        self.id = player_id
         self.is_alive = True
     
     @abstractmethod
@@ -76,7 +84,13 @@ class Human(Player):
                 is_error = False         
         return move
 
+    def __repr__(self):
+        return f"Human({self.id})"
+
 class Bot(Player):
     """Class for bot players"""
     def get_next_move(self,g):
         pass
+
+    def __repr__(self):
+        return f"Bot({self.id})"
