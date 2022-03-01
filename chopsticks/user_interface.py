@@ -56,7 +56,7 @@ class CommandLine(Ui):
         
         try:
             if ui_list[0] in ['h','hit']:
-                #Input: Hit, PLayerBeingHit, GivingHand, RecievingHand
+                #Input: Hit, PLayerBeingHit, GivingHand, ReceivingHand
                 return ("h",  int(ui_list[1]), int(ui_list[2]), int(ui_list[3]))
             elif ui_list[0] in ['s','split']:
                 #Input: Split, Hand1, Hand2, Amount1, Amount2

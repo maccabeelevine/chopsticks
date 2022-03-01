@@ -64,7 +64,7 @@ class CommandLine:
         
         try:
             if ui_list[0] in ['h','hit']:
-                #Input: Hit, PLayerBeingHit RecievingHand, GivingHand
+                #Input: Hit, PLayerBeingHit ReceivingHand, GivingHand
                 return ("h",  int(ui_list[1]), int(ui_list[2]), int(ui_list[3]))
             elif ui_list[0] in ['s','split']:
                 #Input: Split, Hand1, Hand2, Amount1, Amount2
@@ -134,13 +134,13 @@ class Game:
     
     
     
-    def hit(self, attack_player_id, defend_player_id, recieving_hand, giving_hand):
+    def hit(self, attack_player_id, defend_player_id, receiving_hand, giving_hand):
         """hits a player's hand with the current player's hand"""
         
-        if attack_player_id == defend_player_id and giving_hand == recieving_hand:
+        if attack_player_id == defend_player_id and giving_hand == receiving_hand:
             return False
         
-        is_valid_move = self.players[defend_player_id].hands[recieving_hand].add_fingers("h",self.players[attack_player_id].hands[giving_hand].alive_fingers)
+        is_valid_move = self.players[defend_player_id].hands[receiving_hand].add_fingers("h",self.players[attack_player_id].hands[giving_hand].alive_fingers)
         
         return is_valid_move
 

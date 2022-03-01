@@ -11,7 +11,7 @@ class Logic:
     """
     Class for game logic
     """
-    def hit(self, g, attack_player_id, defend_player_id, giving_hand, recieving_hand):
+    def hit(self, g, attack_player_id, defend_player_id, giving_hand, receiving_hand):
         """
         hits a player's hand with the current player's hand and updates the Game object g
         
@@ -25,7 +25,7 @@ class Logic:
             Id of the defending player
         giving_hand: int
             Id of the hand of the attacking player
-        recieving_hand: int
+        receiving_hand: int
             Id of the hand of the defending player
 
         Returns
@@ -35,10 +35,10 @@ class Logic:
         """
         
         #move validation
-        if attack_player_id == defend_player_id and giving_hand == recieving_hand:
+        if attack_player_id == defend_player_id and giving_hand == receiving_hand:
             return False
         
-        defending_hand = g.players[defend_player_id].hands[recieving_hand]
+        defending_hand = g.players[defend_player_id].hands[receiving_hand]
         num_attacking_fingers = g.players[attack_player_id].hands[giving_hand].alive_fingers
         
         is_valid_move = defending_hand.add_fingers("h", num_attacking_fingers)
