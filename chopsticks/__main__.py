@@ -9,7 +9,11 @@ import sys
 
 
 def main():
-    g = core.Game(sys.argv[0], sys.argv[1], sys.argv[2], sys.argv[3])
+    g = core.Game(
+        int(sys.argv[1]), 
+        int(sys.argv[2]), 
+        int(sys.argv[3]), 
+        int(sys.argv[4]))
     g.play()
 
 
