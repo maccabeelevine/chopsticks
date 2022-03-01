@@ -35,7 +35,7 @@ class Logic:
         """
         
         #move validation
-        if attack_player_id == defend_player_id and giving_hand == receiving_hand:
+        if attack_player_id == defend_player_id:
             return False
         
         defending_hand = g.players[defend_player_id].hands[receiving_hand]
