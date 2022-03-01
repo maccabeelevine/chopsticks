@@ -11,7 +11,7 @@ class Logic:
     """
     Class for game logic
     """
-    def hit(self, g, attack_player_id, defend_player_id, recieving_hand, giving_hand):
+    def hit(self, g, attack_player_id, defend_player_id, giving_hand, recieving_hand):
         """
         hits a player's hand with the current player's hand and updates the Game object g
         
@@ -23,10 +23,10 @@ class Logic:
             Id of the attacking player
         defend_player_id: int
             Id of the defending player
-        recieving_hand: int
-            Id of the hand of the defending player
         giving_hand: int
             Id of the hand of the attacking player
+        recieving_hand: int
+            Id of the hand of the defending player
 
         Returns
         -------
