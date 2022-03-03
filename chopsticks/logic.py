@@ -11,6 +11,16 @@ class Logic:
     """
     Class for game logic
     """
+
+    def do_move(self, g, move, player_index):
+        """ Performs the specified move by the specified player """
+        if move[0] == "h":
+            is_valid_move = self.hit(g, player_index, move[1]-1, move[2]-1, move[3]-1)
+        elif move[0] == "s":
+            is_valid_move = self.split(g, player_index, move[1]-1, move[2]-1, move[3], move[4])
+        return is_valid_move
+        
+        
     def hit(self, g, attack_player_id, defend_player_id, giving_hand, receiving_hand):
         """
         hits a player's hand with the current player's hand and updates the Game object g

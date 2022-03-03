@@ -61,6 +61,12 @@ class Player(ABC):
         """Gets the next move"""
         pass
 
+    def get_alive_fingers(self):
+        alive_fingers = 0
+        for hand in self.hands:
+            alive_fingers += hand.alive_fingers
+        return alive_fingers
+
     def check_if_alive(self):
         """Checks if the player is alive"""
         if self.is_alive == False:
@@ -86,11 +92,3 @@ class Human(Player):
 
     def __repr__(self):
         return f"Human({self.id})"
-
-class Bot(Player):
-    """Class for bot players"""
-    def get_next_move(self,g):
-        pass
-
-    def __repr__(self):
-        return f"Bot({self.id})"

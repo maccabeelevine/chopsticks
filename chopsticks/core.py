@@ -6,8 +6,9 @@ Authors: Luca Bianchi
 
 Description: Core functionality module for the Chopsticks game. Contains the game class
 '''
-from chopsticks.player import Human, Bot, Hand, Player
-from chopsticks.user_interface import Ui, Gui, CommandLine
+from chopsticks.bots import RandomBot
+from chopsticks.player import Human
+from chopsticks.user_interface import CommandLine
 import chopsticks.logic as logic
 
 
@@ -43,8 +44,8 @@ class Game:
         match player_type:
             case 'H':
                 return Human(num_hands, num_fingers)
-            case 'R':
-                return Bot(num_hands, num_fingers)
+            case 'RB':
+                return RandomBot(num_hands, num_fingers)
             case _:
                 raise Exception(f"Unknown player type: {player_type}")
     
@@ -58,25 +59,21 @@ class Game:
                     is_valid_move = False
                     while is_valid_move == False:
                         move = self.players[i].get_next_move(self)
-                        if move[0] == "h":
-                            is_valid_move = self.logic.hit(self, i, move[1]-1, move[2]-1, move[3]-1)
-                        elif move[0] == "s":
-                            is_valid_move = self.logic.split(self, i, move[1]-1, move[2]-1, move[3], move[4])
-                            
-                        
+                        is_valid_move = self.logic.do_move(self, move, i)
                         if is_valid_move == False:
                             print("Not A Valid Move")
-    
                 else:
-                    move = ("h","1","1","1") #TODO Change this
-                    print("Bots Move")
+                    move = self.players[i].get_next_move(self)
+                    is_valid_move = self.logic.do_move(self, move, i)
+                    if not is_valid_move:
+                        raise Exception(f"Bot returned invalid move: {move}")
                     
             self.game_is_over = self.logic.check_if_game_over(self)
             i+=1
             if(i >= self.num_players):
                 i=0
         print("Game Over")
-        
+    
 if __name__ == '__main__':
     g = Game(2,0,2,5)
     g.play()
