@@ -92,12 +92,6 @@ class Logic:
         if hand_1_fingers == amount_2 and hand_2_fingers == amount_1:
             print('This is the same hand set as before.')
             return False
-        if amount_1 == 0:
-            print('Cannot destroy hand this way.')
-            return False
-        if amount_2 == 0:
-            print('Cannot destroy hand this way.')
-            return False
         if hand_1_fingers + hand_2_fingers != amount_1 + amount_2:
             print('Must equal same amount of fingers.')
             return False
@@ -107,10 +101,10 @@ class Logic:
         if amount_2 >= g.num_fingers:
             print('Too many fingers on one hand.')
             return False
-        if amount_1 <=0:
+        if amount_1 < 0:
             print('Cannot have a negative')
             return False
-        if amount_2 <=0:
+        if amount_2 < 0:
             print('Cannot have a negative')
             return False
         if hand_1 == -1:
