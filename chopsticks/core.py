@@ -35,17 +35,18 @@ class Game:
         self.ui  = CommandLine()
         
         self.players = \
-            [self.build_player(player_type, num_hands, num_fingers) for player_type in player_types]
+            [self.build_player(index + 1, player_type, num_hands, num_fingers) 
+                for index, player_type in enumerate(player_types)]
         
         print(f"Players: {self.players}" +
               "\nHands per Player: ", self.num_hands, "\nFingers per hand: ", self.num_fingers , "\n")
 
-    def build_player(self, player_type, num_hands, num_fingers):
+    def build_player(self, player_id, player_type, num_hands, num_fingers):
         match player_type:
             case 'H':
-                return Human(num_hands, num_fingers)
+                return Human(player_id, num_hands, num_fingers)
             case 'RB':
-                return RandomBot(num_hands, num_fingers)
+                return RandomBot(player_id, num_hands, num_fingers)
             case _:
                 raise Exception(f"Unknown player type: {player_type}")
     
@@ -73,8 +74,42 @@ class Game:
             if(i >= self.num_players):
                 i=0
         
-        print(f"Game Over.  The winner is {self.logic.get_winning_player(self)}!")
-    
+        print(f"Game Over.  The winner is {self.logic.get_winning_player(self)}!\n\n")
+
+
+class Tournament:
+    """ A series of games with the same players """
+
+    def __init__(self, num_hands, num_fingers, num_games, player_types):
+        self.num_hands = num_hands
+        self.num_fingers = num_fingers
+        self.num_games = num_games
+        self.player_types = player_types
+        self.winners = {}
+
+    def play(self):
+        print(f"Starting a {self.num_games}-game tournament.")
+        for game_index in range(self.num_games):
+            g = Game(self.num_hands, self.num_fingers, self.player_types)
+            g.play()
+            self.record_win(g.logic.get_winning_player(g))
+        self.print_results()
+
+    def record_win(self, player):
+        if player.id not in self.winners:
+            self.winners[player.id] = 0
+        wins = self.winners[player.id]
+        wins += 1
+        self.winners[player.id] = wins
+
+    def print_results(self):
+        def get_key(pair):
+            return pair[0]
+        for player_id, wins in sorted(self.winners.items(), key = get_key):
+            print(f"Player {player_id} won {wins} games.")
+        print("Any other players did not win any games.")
+
+
 if __name__ == '__main__':
     g = Game(2,0,2,5)
     g.play()

@@ -43,16 +43,9 @@ class Hand:
 
 class Player(ABC):
 
-    _next_player = 1
-
-    def get_next_player():
-        next = Player._next_player
-        Player._next_player += 1
-        return next
-
     """Abstract class for players in the game"""
-    def __init__(self, num_hands, num_fingers):
-        self.id = Player.get_next_player()
+    def __init__(self, id, num_hands, num_fingers):
+        self.id = id
         self.hands = [Hand(num_fingers) for x in range(num_hands)]
     
     @abstractmethod
