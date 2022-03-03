@@ -32,14 +32,16 @@ class BotUtil:
         player_alive_fingers = player.get_alive_fingers()
         legal_split_moves = []
         # TODO remove hard-coded assumption about two hands, already in logic.py
-        for left_fingers in range(0, player_alive_fingers + 1):
+        max_hand_fingers = min(player_alive_fingers, g.num_fingers - 1)
+        for left_fingers in range(0, max_hand_fingers + 1):
 
             # if this move would actually change the game state
             if not left_fingers == player.hands[0].alive_fingers \
                     and not left_fingers == player.hands[1].alive_fingers:
 
                 right_fingers = player_alive_fingers - left_fingers
-                move = ('s', 1, 2, left_fingers, right_fingers)
-                legal_split_moves.append(move)
+                if not right_fingers > max_hand_fingers:
+                    move = ('s', 1, 2, left_fingers, right_fingers)
+                    legal_split_moves.append(move)
 
         return legal_split_moves
