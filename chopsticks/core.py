@@ -53,7 +53,7 @@ class Game:
         """Game Loop"""
         i = 0
         while self.game_is_over == False:
-            if self.players[i].check_if_alive() == True:
+            if self.players[i].is_alive():
                 self.ui.display_game_state(self)
                 if isinstance(self.players[i], Human):
                     is_valid_move = False

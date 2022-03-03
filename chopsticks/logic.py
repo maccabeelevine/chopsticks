@@ -146,13 +146,11 @@ class Logic:
 
         Returns
         -------
-        True if 2 or more players are alive, otherwise false
+        True if only one player is alive, otherwise false
         """
         alive_count = 0
         for player in g.players:
-            if player.is_alive == True:
+            if player.is_alive():
                 alive_count += 1
-            if alive_count > 1:
-                return False
-        return True
+        return alive_count < 2
     

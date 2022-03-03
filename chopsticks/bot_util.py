@@ -16,11 +16,11 @@ class BotUtil:
 
                 # iterate through any of my hands that are alive
                 for my_hand in range(1, g.num_hands + 1):
-                    if g.players[player_id - 1].hands[my_hand - 1].is_alive:
+                    if g.players[player_id - 1].hands[my_hand - 1].is_alive():
 
                         # iterate through opponent hands that are alive
                         for opponent_hand in range(1, g.num_hands + 1):
-                            if g.players[opponent_id - 1].hands[opponent_hand - 1].is_alive:
+                            if g.players[opponent_id - 1].hands[opponent_hand - 1].is_alive():
                                 move = ("h", opponent_id, my_hand, opponent_hand)
                                 legal_hit_moves.append(move)
 
