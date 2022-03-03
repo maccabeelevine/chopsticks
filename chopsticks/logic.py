@@ -96,9 +96,6 @@ class Logic:
         if hand_1_fingers + hand_2_fingers == 1:
             print('Cannot split.')
             return False
-        if hand_1_fingers == 1 and hand_2_fingers == 1:
-            print('Must have more than one finger to split.')
-            return False
         if hand_1_fingers == amount_2 and hand_2_fingers == amount_1:
             print('This is the same hand set as before.')
             return False
