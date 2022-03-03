@@ -72,7 +72,8 @@ class Game:
             i+=1
             if(i >= self.num_players):
                 i=0
-        print("Game Over")
+        
+        print(f"Game Over.  The winner is {self.logic.get_winning_player(self)}!")
     
 if __name__ == '__main__':
     g = Game(2,0,2,5)

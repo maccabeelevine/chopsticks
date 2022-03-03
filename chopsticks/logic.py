@@ -150,4 +150,11 @@ class Logic:
             if player.is_alive():
                 alive_count += 1
         return alive_count < 2
+
+    def get_winning_player(self, g):
+        if not self.check_if_game_over(g):
+            raise Exception("No winning player yet, the game is still going on.")
+        for player in g.players:
+            if player.is_alive():
+                return player
     
