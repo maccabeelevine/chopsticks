@@ -1,7 +1,5 @@
 class BotUtil:
 
-    # _possible_moves = None
-
     def get_legal_moves(g, player_id):
         """ Get all legal moves available right now """
         legal_moves = BotUtil._get_legal_hit_moves(g, player_id)
@@ -9,26 +7,24 @@ class BotUtil:
         return legal_moves
 
     def _get_legal_hit_moves(g, player_id):
-        # TODO filter on actually legal
-        return BotUtil._get_possible_hit_moves(g, player_id)
-
-    def _get_possible_hit_moves(g, player_id):
-        """ Generate list of possible hit moves based on initial setup, ignoring game state """
-        possible_hit_moves = []
+        """ Generate list of legal hit moves based on game state """
+        legal_hit_moves = []
 
         # iterate through other players
         for opponent_id in range(1, g.num_players + 1):
             if not opponent_id == player_id:
 
-                # iterate through my hands
+                # iterate through any of my hands that are alive
                 for my_hand in range(1, g.num_hands + 1):
+                    if g.players[player_id - 1].hands[my_hand - 1].is_alive:
 
-                    # iterate through opponent hands
-                    for opponent_hand in range(1, g.num_hands + 1):
-                        move = ("h", opponent_id, my_hand, opponent_hand)
-                        possible_hit_moves.append(move)
+                        # iterate through opponent hands that are alive
+                        for opponent_hand in range(1, g.num_hands + 1):
+                            if g.players[opponent_id - 1].hands[opponent_hand - 1].is_alive:
+                                move = ("h", opponent_id, my_hand, opponent_hand)
+                                legal_hit_moves.append(move)
 
-        return possible_hit_moves
+        return legal_hit_moves
 
     def _get_legal_split_moves(g, player_id):
         """ Generate list of legal split moves, based on current game state """
