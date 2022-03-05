@@ -1,3 +1,5 @@
+from chopsticks.player import Move
+
 class BotUtil:
 
     def get_legal_moves(g, player_id):
@@ -21,7 +23,7 @@ class BotUtil:
                         # iterate through opponent hands that are alive
                         for opponent_hand in range(1, g.num_hands + 1):
                             if g.players[opponent_id - 1].hands[opponent_hand - 1].is_alive():
-                                move = ("h", opponent_id, my_hand, opponent_hand)
+                                move = (Move.HIT, opponent_id, my_hand, opponent_hand)
                                 legal_hit_moves.append(move)
 
         return legal_hit_moves
@@ -41,7 +43,7 @@ class BotUtil:
 
                 right_fingers = player_alive_fingers - left_fingers
                 if not right_fingers > max_hand_fingers:
-                    move = ('s', 1, 2, left_fingers, right_fingers)
+                    move = (Move.SPLIT, 1, 2, left_fingers, right_fingers)
                     legal_split_moves.append(move)
 
         return legal_split_moves

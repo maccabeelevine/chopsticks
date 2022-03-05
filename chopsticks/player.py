@@ -7,6 +7,10 @@ Authors: Luca Bianchi
 
 from abc import ABC, abstractmethod
 
+class Move:
+    HIT = "h"
+    SPLIT = "s"
+
 class Hand:
     """
     Class representing the hand of a player
@@ -32,7 +36,7 @@ class Hand:
         num_fingers: int
             Number of fingers to add
         """
-        if (move_type == "h" and self.alive_fingers == 0) or num_fingers == 0:
+        if (move_type == Move.HIT and self.alive_fingers == 0) or num_fingers == 0:
             return False
 
         self.alive_fingers = (self.alive_fingers + num_fingers) % self.total_fingers

@@ -7,6 +7,8 @@ Authors: Luca Bianchi
 Description: Object which contains the game logic
 """
 
+from player import Move
+
 class Logic:
     """
     Class for game logic
@@ -14,9 +16,9 @@ class Logic:
 
     def do_move(self, g, move, player_index):
         """ Performs the specified move by the specified player """
-        if move[0] == "h":
+        if move[0] == Move.HIT:
             is_valid_move = self.hit(g, player_index, move[1]-1, move[2]-1, move[3]-1)
-        elif move[0] == "s":
+        elif move[0] == Move.SPLIT:
             is_valid_move = self.split(g, player_index, move[1]-1, move[2]-1, move[3], move[4])
         return is_valid_move
         
@@ -51,7 +53,7 @@ class Logic:
         defending_hand = g.players[defend_player_id].hands[receiving_hand]
         num_attacking_fingers = g.players[attack_player_id].hands[giving_hand].alive_fingers
         
-        is_valid_move = defending_hand.add_fingers("h", num_attacking_fingers)
+        is_valid_move = defending_hand.add_fingers(Move.HIT, num_attacking_fingers)
         
         return is_valid_move
 

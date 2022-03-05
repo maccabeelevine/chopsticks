@@ -5,7 +5,7 @@ Authors: Luca Bianchi
          Tom MacArthur
 """
 
-from chopsticks.player import Human
+from chopsticks.player import Human, Move
 from abc import ABC, abstractmethod
 
 class Ui(ABC):
@@ -55,12 +55,12 @@ class CommandLine(Ui):
         ui_list = ui.strip().lower().split()
         
         try:
-            if ui_list[0] in ['h','hit']:
+            if ui_list[0] in [Move.HIT,'hit']:
                 #Input: Hit, PLayerBeingHit, GivingHand, ReceivingHand
-                return ("h",  int(ui_list[1]), int(ui_list[2]), int(ui_list[3]))
-            elif ui_list[0] in ['s','split']:
+                return (Move.HIT,  int(ui_list[1]), int(ui_list[2]), int(ui_list[3]))
+            elif ui_list[0] in [Move.SPLIT,'split']:
                 #Input: Split, Hand1, Hand2, Amount1, Amount2
-                return ("s", int(ui_list[1]), int(ui_list[2]), int(ui_list[3]), int(ui_list[4]))
+                return (Move.SPLIT, int(ui_list[1]), int(ui_list[2]), int(ui_list[3]), int(ui_list[4]))
             elif ui_list[0] == "help":
                 return "help"
             else:
