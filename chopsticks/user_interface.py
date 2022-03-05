@@ -39,9 +39,9 @@ class CommandLine(Ui):
         str_list = []
         for player in g.players:
             if isinstance(player, Human):
-                str_list.append( "Human " + str(player.id) + ": (")
+                str_list.append(f"Human {str(player.id)}: (")
             else:
-                str_list.append( "Bot " + str(player.id) + ": (")
+                str_list.append(f"{player}: (")
             
             for hand in player.hands:
                 str_list.append(" " + str(hand.alive_fingers) + " ")

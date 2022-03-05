@@ -57,6 +57,13 @@ class Player(ABC):
         """Gets the next move"""
         pass
 
+    def get_alive_hands(self):
+        alive_hands = []
+        for hand in self.hands:
+            if hand.is_alive():
+                alive_hands.append(hand)
+        return alive_hands
+
     def get_alive_fingers(self):
         alive_fingers = 0
         for hand in self.hands:

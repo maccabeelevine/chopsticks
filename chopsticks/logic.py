@@ -14,16 +14,16 @@ class Logic:
     Class for game logic
     """
 
-    def do_move(self, g, move, player_index):
+    def do_move(self, g, players, move, player_index):
         """ Performs the specified move by the specified player """
         if move[0] == Move.HIT:
-            is_valid_move = self.hit(g, player_index, move[1]-1, move[2]-1, move[3]-1)
+            is_valid_move = self.hit(g, players, player_index, move[1]-1, move[2]-1, move[3]-1)
         elif move[0] == Move.SPLIT:
-            is_valid_move = self.split(g, player_index, move[1]-1, move[2]-1, move[3], move[4])
+            is_valid_move = self.split(g, players, player_index, move[1]-1, move[2]-1, move[3], move[4])
         return is_valid_move
         
         
-    def hit(self, g, attack_player_id, defend_player_id, giving_hand, receiving_hand):
+    def hit(self, g, players, attack_player_id, defend_player_id, giving_hand, receiving_hand):
         """
         hits a player's hand with the current player's hand and updates the Game object g
         
@@ -31,6 +31,8 @@ class Logic:
         ----------
         g: Game object
             reference to the game object
+        players: Player[]
+            List of players, may be from the Game or a Scenario
         attack_player_id: int
             Id of the attacking player
         defend_player_id: int
@@ -50,15 +52,15 @@ class Logic:
         if attack_player_id == defend_player_id:
             return False
         
-        defending_hand = g.players[defend_player_id].hands[receiving_hand]
-        num_attacking_fingers = g.players[attack_player_id].hands[giving_hand].alive_fingers
+        defending_hand = players[defend_player_id].hands[receiving_hand]
+        num_attacking_fingers = players[attack_player_id].hands[giving_hand].alive_fingers
         
         is_valid_move = defending_hand.add_fingers(Move.HIT, num_attacking_fingers)
         
         return is_valid_move
 
     
-    def split(self, g, player_id, hand_1, hand_2, amount_1, amount_2):
+    def split(self, g, players, player_id, hand_1, hand_2, amount_1, amount_2):
         """
         Splits the fingers between two hands and updates the Game object g
         
@@ -66,6 +68,8 @@ class Logic:
         ----------
         g: Game object
             reference to the game object
+        players: Player[]
+            List of players, may be from the Game or a Scenario
         player_id: int
             Id of the player
         hand_1: int
@@ -91,8 +95,8 @@ class Logic:
             print('Select a hand')
             return False
         
-        hand_1_fingers = g.players[player_id].hands[hand_1].alive_fingers
-        hand_2_fingers = g.players[player_id].hands[hand_2].alive_fingers
+        hand_1_fingers = players[player_id].hands[hand_1].alive_fingers
+        hand_2_fingers = players[player_id].hands[hand_2].alive_fingers
         
        
         if hand_1_fingers + hand_2_fingers == 1:
@@ -129,8 +133,8 @@ class Logic:
             print('Select somone who is playing')
             return False
         else: 
-            g.players[player_id].hands[hand_1].alive_fingers = amount_1
-            g.players[player_id].hands[hand_2].alive_fingers = amount_2
+            players[player_id].hands[hand_1].alive_fingers = amount_1
+            players[player_id].hands[hand_2].alive_fingers = amount_2
             return True
 
 

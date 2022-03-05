@@ -6,7 +6,7 @@ Authors: Luca Bianchi
 
 Description: Core functionality module for the Chopsticks game. Contains the game class
 '''
-from chopsticks.bots import RandomBot
+from chopsticks.bots import RandomBot, AttackBot
 from chopsticks.player import Human
 from chopsticks.user_interface import CommandLine
 import chopsticks.logic as logic
@@ -47,6 +47,8 @@ class Game:
                 return Human(player_id, num_hands, num_fingers)
             case 'RB':
                 return RandomBot(player_id, num_hands, num_fingers)
+            case 'AB':
+                return AttackBot(player_id, num_hands, num_fingers)
             case _:
                 raise Exception(f"Unknown player type: {player_type}")
     
@@ -60,12 +62,13 @@ class Game:
                     is_valid_move = False
                     while is_valid_move == False:
                         move = self.players[i].get_next_move(self)
-                        is_valid_move = self.logic.do_move(self, move, i)
+                        is_valid_move = self.logic.do_move(self, self.players, move, i)
                         if is_valid_move == False:
                             print("Not A Valid Move")
                 else:
-                    move = self.players[i].get_next_move(self)
-                    is_valid_move = self.logic.do_move(self, move, i)
+                    move = self.players[i].get_next_move(self)        
+                    print(f"{self.players[i]} selected move: {move}")
+                    is_valid_move = self.logic.do_move(self, self.players, move, i)
                     if not is_valid_move:
                         raise Exception(f"Bot returned invalid move: {move}")
                     

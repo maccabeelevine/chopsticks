@@ -1,4 +1,5 @@
 from chopsticks.player import Move
+import copy
 
 class BotUtil:
 
@@ -47,3 +48,27 @@ class BotUtil:
                     legal_split_moves.append(move)
 
         return legal_split_moves
+
+    def get_opponent(players, move):
+        if move[0] == Move.SPLIT:
+            return None
+        
+        opponent_player_id = move[1]
+        return players[opponent_player_id - 1]
+
+
+class Scenario():
+
+    def __init__(self, g, player_id, move):
+        self._initPlayers(g)
+        self._initOpponents(player_id)
+        g.logic.do_move(g, self.players, move, player_id-1)
+
+    def _initPlayers(self, g):
+        self.players = copy.deepcopy(g.players)
+
+    def _initOpponents(self, player_id):
+        self.opponents = []
+        for player in self.players:
+            if not player.id == player_id:
+                self.opponents.append(player)
