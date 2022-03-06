@@ -81,6 +81,7 @@ class BotUtil:
         is_my_turn = current_player_id == optimizing_player_id
         legal_moves = BotUtil.get_legal_moves(g, state, current_player_id)
         results = BotUtil.SimulationResults()
+        moves_to_recurse: dict[Move, Scenario] = {}
         for move in legal_moves:
             scenario = Scenario(g, state, current_player_id, move)
             BotUtil.print_r(f"consider move {move} leading to scenario {scenario}", current_round)
@@ -107,32 +108,41 @@ class BotUtil:
 
             # for a neutral test result, recurse
             else:
-                next_player_id = 1 if current_player_id == g.num_players else current_player_id + 1
-                BotUtil.print_r(f"found neutral move, so recurse", current_round)
-                recursion_results = BotUtil.simulate(g, scenario, next_player_id, starting_state, 
-                    starting_move if starting_move else move,
-                    move, optimizing_player_id, additional_rounds - 1, current_round + 1, exit_test)
+                BotUtil.print_r(f"found neutral move, so recurse later if needed", current_round)
+                moves_to_recurse[move] = scenario
+                continue
 
-                if recursion_results:
-                    if recursion_results.success:
-                        BotUtil.print_r(f"returning recursive success {recursion_results.success}", current_round)
-                        return recursion_results
-                    elif recursion_results.failure:
-                        if is_my_turn:
-                            continue
-                        else:
-                            BotUtil.print_r(f"returning recursive failure", current_round)
-                            return recursion_results
-                    else:
-                        BotUtil.print_r(f"recursion returned with only neutral moves, so add neutral move", current_round)
-                        results.add_neutral_move(move)
+        # did a breadth-first search at this level and did not return, so now recurse
+        BotUtil.print_r(f"recurse on stored neutral moves", current_round)
+        for move in moves_to_recurse.keys():
+            next_player_id = 1 if current_player_id == g.num_players else current_player_id + 1
+            scenario = moves_to_recurse[move]
+            BotUtil.print_r(f"recurse on move {move} leading to scenario {scenario}", current_round)
+            recursion_results = BotUtil.simulate(g, scenario, next_player_id, starting_state, 
+                starting_move if starting_move else move,
+                move, optimizing_player_id, additional_rounds - 1, current_round + 1, exit_test)
+
+            if recursion_results:
+                if recursion_results.success:
+                    BotUtil.print_r(f"returning recursive success {recursion_results.success}", current_round)
+                    return recursion_results
+                elif recursion_results.failure:
+                    if is_my_turn:
                         continue
-
+                    else:
+                        BotUtil.print_r(f"returning recursive failure", current_round)
+                        return recursion_results
                 else:
-                    BotUtil.print_r(f"returned from recursion with no results, so adding neutral move {move}", current_round)
+                    BotUtil.print_r(f"recursion returned with only neutral moves, so add neutral move", current_round)
                     results.add_neutral_move(move)
                     continue
 
+            else:
+                BotUtil.print_r(f"returned from recursion with no results, so adding neutral move {move}", current_round)
+                results.add_neutral_move(move)
+                continue
+
+        # considered all recursion moves and still no definitive move
         if is_my_turn:
             BotUtil.print_r(f"considered all moves, nothing found, returning neutral moves: {results.neutral_moves}", current_round)
             return results
