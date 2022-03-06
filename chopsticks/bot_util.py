@@ -1,7 +1,8 @@
 from __future__ import annotations
 from chopsticks.move import Move, Hit, Split
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, cast, Callable
+from state import Scenario
 if TYPE_CHECKING:
     from chopsticks.core import Game
     from chopsticks.state import State
@@ -67,3 +68,91 @@ class BotUtil:
                 return player
         raise Exception("Could not find opponent")
 
+    @staticmethod
+    def simulate(g: Game, state: State, current_player_id: int, starting_state: State, 
+        starting_move: Move|None,
+        prior_move: Move|None, optimizing_player_id: int, additional_rounds: int, current_round: int,
+        exit_test: Callable[[Scenario, int, int, State, int], int]) -> SimulationResults|None:
+        
+        if not additional_rounds:
+            BotUtil.print_r("no additional rounds on this tree", current_round)
+            return None
+
+        is_my_turn = current_player_id == optimizing_player_id
+        legal_moves = BotUtil.get_legal_moves(g, state, current_player_id)
+        results = BotUtil.SimulationResults()
+        for move in legal_moves:
+            scenario = Scenario(g, state, current_player_id, move)
+            BotUtil.print_r(f"consider move {move} leading to scenario {scenario}", current_round)
+            test_result = exit_test(scenario, additional_rounds - 1, current_round, starting_state, optimizing_player_id)
+
+            # for a good test result
+            if test_result > 0:
+                if is_my_turn:
+                    BotUtil.print_r("good result for me", current_round)
+                    return results.record_success(starting_move if starting_move else move)
+                else:
+                    BotUtil.print_r("ignore good result for me on opponent's turn", current_round)
+                    continue
+
+            # for a bad test result
+            elif test_result < 0:
+                if is_my_turn:
+                    BotUtil.print_r("ignore bad result for me on my turn", current_round)
+                    continue
+                else:
+                    BotUtil.print_r("bad result for me on opponent's turn, kill tree", current_round)
+                    return results.record_failure()
+
+            # for a neutral test result, recurse
+            else:
+                next_player_id = 1 if current_player_id == g.num_players else current_player_id + 1
+                BotUtil.print_r(f"found neutral move, so recurse", current_round)
+                recursion_results = BotUtil.simulate(g, scenario, next_player_id, starting_state, 
+                    starting_move if starting_move else move,
+                    move, optimizing_player_id, additional_rounds - 1, current_round + 1, exit_test)
+
+                if recursion_results:
+                    if recursion_results.success:
+                        BotUtil.print_r(f"returning recursive success {recursion_results.success}", current_round)
+                        return recursion_results
+                    elif recursion_results.failure:
+                        if is_my_turn:
+                            continue
+                        else:
+                            BotUtil.print_r(f"returning recursive failure", current_round)
+                            return recursion_results
+                    else:
+                        BotUtil.print_r(f"recursion returned with only neutral moves, so add neutral move", current_round)
+                        results.add_neutral_move(move)
+                        continue
+
+                else:
+                    BotUtil.print_r(f"returned from recursion with no results, so adding neutral move {move}", current_round)
+                    results.add_neutral_move(move)
+                    continue
+
+        BotUtil.print_r(f"considered all moves, nothing found, returning neutral moves: {results.neutral_moves}", current_round)
+        return results
+
+    @staticmethod
+    def print_r(message: str, depth: int):
+        print("..." * depth + " " + message)
+
+    class SimulationResults:
+
+        def __init__(self):
+            self.success = None
+            self.neutral_moves: list[Move] = []
+            self.failure = False
+
+        def record_success(self, success: Move) -> BotUtil.SimulationResults:
+            self.success = success
+            return self
+
+        def record_failure(self):
+            self.failure = True
+            return self
+
+        def add_neutral_move(self, neutral_move: Move):
+            self.neutral_moves.append(neutral_move)

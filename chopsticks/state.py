@@ -19,6 +19,9 @@ class State:
     def players(self) -> list[Player]:
         return self._players
 
+    def __repr__(self):
+        return str([player.hands() for player in self.players()])
+
 
 class Scenario(State):
 

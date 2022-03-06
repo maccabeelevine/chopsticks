@@ -58,3 +58,35 @@ class AttackBot(Bot):
         # no strategy-matching move found
         print("... No strategy move found, resorting to random.")
         return random.choice(legal_moves)
+
+class DefendBot(Bot):
+    """ Bot that always skips a move that could let the opponent erase one of it's hands. """
+
+    def get_next_move(self, g: Game, state: State):
+        results = BotUtil.simulate(g=g, state=state, current_player_id=self.id, starting_state=state, 
+            starting_move=None, prior_move=None, optimizing_player_id=self.id, additional_rounds=2, current_round=1,
+            exit_test=DefendBot._exit_test)
+
+        if results:
+            if results.success:
+                print("... Found strategy move")
+                return results.success
+            elif results.neutral_moves:
+                print("... Only neutral moves found, choosing one of them.")
+                return random.choice(results.neutral_moves)
+
+        print("... No safe moves found, resorting to random.")
+        legal_moves = BotUtil.get_legal_moves(g, state, self.id)
+        return random.choice(legal_moves)
+
+    @staticmethod
+    def _exit_test(scenario: Scenario, additional_rounds: int, current_round: int, 
+        starting_state: State, optimizing_player_id: int) -> int:
+
+        before_alive_hands = starting_state.player(optimizing_player_id).get_alive_hands()
+        after_alive_hands = scenario.player(optimizing_player_id).get_alive_hands()
+        if len(after_alive_hands) < len(before_alive_hands):
+            BotUtil.print_r(f"... rejecting due to hands {scenario.player(optimizing_player_id).hands()}", current_round)
+            return -1
+        else:
+            return 0

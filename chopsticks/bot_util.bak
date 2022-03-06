@@ -1,0 +1,126 @@
+from __future__ import annotations
+from chopsticks.move import Move, Hit, Split
+
+from typing import TYPE_CHECKING, cast, Callable
+from state import Scenario
+if TYPE_CHECKING:
+    from chopsticks.core import Game
+    from chopsticks.state import State
+    from chopsticks.player import Player
+
+
+class BotUtil:
+
+    @staticmethod
+    def get_legal_moves(g: Game, state: State, player_id: int) -> list[Move]:
+        """ Get all legal moves available right now """
+        legal_moves: list[Move] = cast(list[Move], BotUtil._get_legal_hit_moves(g, state, player_id))
+        legal_moves.extend(BotUtil._get_legal_split_moves(g, state, player_id))
+        return legal_moves
+
+    @staticmethod
+    def _get_legal_hit_moves(g: Game, state: State, player_id: int) -> list[Hit]:
+        """ Generate list of legal hit moves based on game state """
+        legal_hit_moves: list[Hit] = []
+
+        # iterate through other players
+        for opponent_id in range(1, g.num_players + 1):
+            if not opponent_id == player_id:
+
+                # iterate through any of my hands that are alive
+                for my_hand in range(1, g.num_hands + 1):
+                    if state.player(player_id).hand(my_hand).is_alive():
+
+                        # iterate through opponent hands that are alive
+                        for opponent_hand in range(1, g.num_hands + 1):
+                            if g.player(opponent_id).hand(opponent_hand).is_alive():
+                                move = Hit(opponent_id, my_hand, opponent_hand)
+                                legal_hit_moves.append(move)
+
+        return legal_hit_moves
+
+    @staticmethod
+    def _get_legal_split_moves(g: Game, state: State, player_id: int) -> list[Split]:
+        """ Generate list of legal split moves, based on current game state """
+        player = state.player(player_id)
+        player_alive_fingers = player.get_alive_fingers()
+        legal_split_moves: list[Split] = []
+        # TODO remove hard-coded assumption about two hands, already in logic.py
+        max_hand_fingers = min(player_alive_fingers, g.num_fingers - 1)
+        for left_fingers in range(0, max_hand_fingers + 1):
+
+            # if this move would actually change the game state
+            if not left_fingers == player.hand(1).alive_fingers \
+                    and not left_fingers == player.hand(2).alive_fingers:
+
+                right_fingers = player_alive_fingers - left_fingers
+                if not right_fingers > max_hand_fingers:
+                    move = Split(1, 2, left_fingers, right_fingers)
+                    legal_split_moves.append(move)
+
+        return legal_split_moves
+
+    @staticmethod
+    def get_opponent(players: list[Player], hit: Hit) -> Player:
+        player: Player
+        for player in players:
+            if player.id == hit.opponent_id:
+                return player
+        raise Exception("Could not find opponent")
+
+    @staticmethod
+    def simulate(g: Game, state: State, current_player_id: int, starting_state: State, starting_move: Move|None,
+        prior_move: Move|None, optimizing_player_id: int, additional_rounds: int, 
+        exit_test_move: Callable[[State, int, State, int], int],
+        exit_test_done: Callable[[State, int, State, int], int]) -> Move|None:
+        
+        legal_moves = BotUtil.get_legal_moves(g, state, current_player_id)
+        for move in legal_moves:
+            scenario = Scenario(g, state, current_player_id, move)
+            print (f"... consider move {move} leading to scenario {scenario}")
+            test_result = exit_test_move(????state, additional_rounds - 1, starting_state, optimizing_player_id)
+
+            # for a positive test result (not zero), return that move
+            if test_result > 0:
+                print(f"... good result")
+                return starting_move
+
+            # for a negative test result, kill this decision tree
+            elif test_result < 0:
+                print(f"... bad result")
+                return None
+
+            # if there are no more rounds, give up
+            if not additional_rounds:
+                print(f"... no more rounds")
+                return None
+
+            # otherwise, recurse
+            next_player_id = 1 if current_player_id == g.num_players else current_player_id + 1
+            if not starting_move:
+                starting_move = move
+            print(f"... recurse")
+            simulation_result = BotUtil.simulate(g, scenario, next_player_id, starting_state, starting_move,
+                move, optimizing_player_id, additional_rounds - 1, exit_test_move, exit_test_done)
+            
+            # for an actual simulation result, return it
+            if simulation_result:
+                return simulation_result
+
+        # through all the possible moves at maximum depth, no result
+        test_result = exit_test_done(state, additional_rounds - 1, starting_state, optimizing_player_id)
+
+        # for a positive test result (not zero), return that move
+        if test_result > 0:
+            print(f"... good result on done")
+            return starting_move
+
+        # for a negative test result, kill this decision tree
+        elif test_result < 0:
+            print(f"... bad result on done")
+            return None
+
+        # if there are no more rounds, give up
+        if not additional_rounds:
+            print(f"... no more rounds on done")
+            return None
