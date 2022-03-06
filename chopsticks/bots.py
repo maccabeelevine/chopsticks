@@ -69,7 +69,7 @@ class RecurseBot(Bot):
     def get_next_move(self, g: Game, state: State):
         results = BotUtil.simulate(g=g, state=state, current_player_id=self.id, starting_state=state, 
             starting_move=None, prior_move=None, optimizing_player_id=self.id, additional_rounds=self.rounds, 
-            current_round=1, exit_test=self._exit_test)
+            current_round=1, exit_test=self.exit_test)
 
         if results:
             if results.success:
@@ -84,14 +84,14 @@ class RecurseBot(Bot):
         return random.choice(legal_moves)
 
     @abstractmethod
-    def _exit_test(self, scenario: Scenario, additional_rounds: int, current_round: int, 
+    def exit_test(self, scenario: Scenario, additional_rounds: int, current_round: int, 
         starting_state: State, prior_state: State|None, optimizing_player_id: int) -> int:
         return cast(int, None)
 
 class AttackBot(RecurseBot):
     """ Bot that always hits if it will erase an opponent's hand within x moves. """
 
-    def _exit_test(self, scenario: Scenario, additional_rounds: int, current_round: int, 
+    def exit_test(self, scenario: Scenario, additional_rounds: int, current_round: int, 
         starting_state: State, prior_state: State|None, optimizing_player_id: int) -> int:
 
         if not scenario.player_id == optimizing_player_id:
@@ -120,7 +120,7 @@ class AttackBot(RecurseBot):
 class DefendBot(RecurseBot):
     """ Bot that always skips a move that could let the opponent erase one of it's hands within x moves. """
 
-    def _exit_test(self, scenario: Scenario, additional_rounds: int, current_round: int, 
+    def exit_test(self, scenario: Scenario, additional_rounds: int, current_round: int, 
         starting_state: State, prior_state: State|None, optimizing_player_id: int) -> int:
 
         prior_state = prior_state if prior_state else starting_state 
@@ -131,3 +131,23 @@ class DefendBot(RecurseBot):
             return -1
         else:
             return 0
+
+class AttackDefendBot(RecurseBot):
+    """ Bot that combines AttackBot and DefendBot strategies. """
+
+    def __init__(self, id: int, num_hands: int, num_fingers: int, rounds: int):
+        super().__init__(id=id, num_hands=num_hands, num_fingers=num_fingers, rounds=rounds)
+        self.attack_bot = AttackBot(id=id, num_hands=num_hands, num_fingers=num_fingers, rounds=rounds)
+        self.defend_bot = DefendBot(id=id, num_hands=num_hands, num_fingers=num_fingers, rounds=rounds)
+
+    def exit_test(self, scenario: Scenario, additional_rounds: int, current_round: int, 
+        starting_state: State, prior_state: State|None, optimizing_player_id: int) -> int:
+
+        # try attack test first.  if it doesn't succeed, use defend test.
+        attack_result = self.attack_bot.exit_test(scenario, additional_rounds, current_round, 
+            starting_state, prior_state, optimizing_player_id)
+        if attack_result:
+            return attack_result
+        else:
+            return self.defend_bot.exit_test(scenario, additional_rounds, current_round, 
+            starting_state, prior_state, optimizing_player_id)
