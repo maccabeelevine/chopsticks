@@ -22,9 +22,6 @@ class Bot(Player):
     def get_next_move(self, g: Game, state: State) -> Move:
         return cast(Move, None)
 
-    def __repr__(self):
-        return f"Bot({self.id})"
-
 class RandomBot(Bot):
     """Bot that makes a random legal move"""
 
@@ -33,9 +30,6 @@ class RandomBot(Bot):
         # print(f"... Legal moves: {legal_moves}")
         move = random.choice(legal_moves)
         return move
-
-    def __repr__(self):
-      return f"RandomBot({self.id})"
 
 class AttackBot(Bot):
     """ Bot that always hits if it will erase an opponent's hand. """
@@ -64,7 +58,3 @@ class AttackBot(Bot):
         # no strategy-matching move found
         print("... No strategy move found, resorting to random.")
         return random.choice(legal_moves)
-
-    def __repr__(self):
-      return f"AtttackBot({self.id})"
-

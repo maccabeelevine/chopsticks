@@ -82,6 +82,10 @@ class Player(ABC):
         """Checks if the player is alive"""
         return self.get_alive_fingers()
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.id})"
+
+
 class Human(Player):
     """Class for human players"""
     def get_next_move(self, g: Game, state: State) -> Move:
@@ -94,6 +98,3 @@ class Human(Player):
             if move != "error" and move != "help":
                 is_error = False         
         return cast(Move, move)
-
-    def __repr__(self):
-        return f"Human({self.id})"
