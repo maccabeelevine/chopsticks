@@ -7,23 +7,33 @@ Authors: Luca Bianchi
 Description: Object which contains the game logic
 """
 
-from player import Move
+from __future__ import annotations
+from chopsticks.move import Move, Hit, Split
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from chopsticks.core import Game
+    from chopsticks.state import State
+    from chopsticks.player import Player
 
 class Logic:
     """
     Class for game logic
     """
 
-    def do_move(self, g, players, move, player_index):
+    @staticmethod
+    def do_move(g: Game, state: State, move: Move, player_id: int) -> bool:
         """ Performs the specified move by the specified player """
-        if move[0] == Move.HIT:
-            is_valid_move = self.hit(g, players, player_index, move[1]-1, move[2]-1, move[3]-1)
-        elif move[0] == Move.SPLIT:
-            is_valid_move = self.split(g, players, player_index, move[1]-1, move[2]-1, move[3], move[4])
+        is_valid_move = False
+        if isinstance(move, Hit):
+            is_valid_move = Logic.hit(g, state, player_id, move)
+        elif isinstance(move, Split):
+            is_valid_move = Logic.split(g, state, player_id, move)
         return is_valid_move
         
         
-    def hit(self, g, players, attack_player_id, defend_player_id, giving_hand, receiving_hand):
+    @staticmethod
+    def hit(g: Game, state: State, attack_player_id: int, hit: Hit):
         """
         hits a player's hand with the current player's hand and updates the Game object g
         
@@ -31,16 +41,10 @@ class Logic:
         ----------
         g: Game object
             reference to the game object
-        players: Player[]
-            List of players, may be from the Game or a Scenario
+        state: State
+            Game state list of players' hands
         attack_player_id: int
             Id of the attacking player
-        defend_player_id: int
-            Id of the defending player
-        giving_hand: int
-            Id of the hand of the attacking player
-        receiving_hand: int
-            Id of the hand of the defending player
 
         Returns
         -------
@@ -49,18 +53,19 @@ class Logic:
         """
         
         #move validation
-        if attack_player_id == defend_player_id:
+        if attack_player_id == hit.opponent_id:
             return False
         
-        defending_hand = players[defend_player_id].hands[receiving_hand]
-        num_attacking_fingers = players[attack_player_id].hands[giving_hand].alive_fingers
+        defending_hand = state.player(hit.opponent_id).hand(hit.opponent_hand)
+        num_attacking_fingers = state.player(attack_player_id).hand(hit.my_hand).alive_fingers
         
-        is_valid_move = defending_hand.add_fingers(Move.HIT, num_attacking_fingers)
+        is_valid_move = defending_hand.add_fingers(num_attacking_fingers)
         
         return is_valid_move
 
     
-    def split(self, g, players, player_id, hand_1, hand_2, amount_1, amount_2):
+    @staticmethod
+    def split(g: Game, state: State, player_id: int, split: Split):
         """
         Splits the fingers between two hands and updates the Game object g
         
@@ -68,18 +73,10 @@ class Logic:
         ----------
         g: Game object
             reference to the game object
-        players: Player[]
-            List of players, may be from the Game or a Scenario
+        state: State
+            Game state list of players' hands
         player_id: int
             Id of the player
-        hand_1: int
-            First hand which is splitting
-        hand_2: int
-            Second hand which is splitting
-        amount_1: int
-            New number of fingers on hand 1
-        amount_2: int
-            New number of fingers on hand 2
             
         Returns
         -------
@@ -88,57 +85,45 @@ class Logic:
         """
 
         
-        if hand_1 > g.num_hands - 1:
+        if split.left_hand_id > g.num_hands:
             print('Select a hand')
             return False
-        if hand_2 > g.num_hands - 1:
+        if split.right_hand_id > g.num_hands:
             print('Select a hand')
             return False
         
-        hand_1_fingers = players[player_id].hands[hand_1].alive_fingers
-        hand_2_fingers = players[player_id].hands[hand_2].alive_fingers
+        left_hand_fingers = state.player(player_id).hand(split.left_hand_id).alive_fingers
+        right_hand_fingers = state.player(player_id).hand(split.right_hand_id).alive_fingers
         
        
-        if hand_1_fingers + hand_2_fingers == 1:
+        if left_hand_fingers + right_hand_fingers == 1:
             print('Cannot split.')
             return False
-        if hand_1_fingers == amount_2 and hand_2_fingers == amount_1:
+        if left_hand_fingers == split.new_right_hand_fingers and right_hand_fingers == split.new_left_hand_fingers:
             print('This is the same hand set as before.')
             return False
-        if hand_1_fingers + hand_2_fingers != amount_1 + amount_2:
+        if left_hand_fingers + right_hand_fingers != split.new_left_hand_fingers + split.new_right_hand_fingers:
             print('Must equal same amount of fingers.')
             return False
-        if amount_1 >= g.num_fingers:
+        if split.new_left_hand_fingers >= g.num_fingers:
             print('Too many fingers on one hand.')
             return False
-        if amount_2 >= g.num_fingers:
+        if split.new_right_hand_fingers >= g.num_fingers:
             print('Too many fingers on one hand.')
             return False
-        if amount_1 < 0:
+        if split.new_left_hand_fingers < 0:
             print('Cannot have a negative')
             return False
-        if amount_2 < 0:
+        if split.new_right_hand_fingers < 0:
             print('Cannot have a negative')
             return False
-        if hand_1 == -1:
-            print('Select a hand.')
-            return False
-        if hand_2 == -1:
-            print('Select a hand.')
-            return False
-        if player_id >= g.num_players:
-            print('Select someone who is playing.')
-            return False
-        if player_id < 0:
-            print('Select somone who is playing')
-            return False
-        else: 
-            players[player_id].hands[hand_1].alive_fingers = amount_1
-            players[player_id].hands[hand_2].alive_fingers = amount_2
-            return True
+        state.player(player_id).hand(split.left_hand_id).alive_fingers = split.new_left_hand_fingers
+        state.player(player_id).hand(split.right_hand_id).alive_fingers = split.new_right_hand_fingers
+        return True
 
 
-    def check_if_game_over(self, g):
+    @staticmethod
+    def check_if_game_over(state: State):
         """
         Check if the game is over
         
@@ -152,15 +137,17 @@ class Logic:
         True if only one player is alive, otherwise false
         """
         alive_count = 0
-        for player in g.players:
+        for player in state.players():
             if player.is_alive():
                 alive_count += 1
         return alive_count < 2
 
-    def get_winning_player(self, g):
-        if not self.check_if_game_over(g):
+    @staticmethod
+    def get_winning_player(state: State) -> Player:
+        if not Logic.check_if_game_over(state):
             raise Exception("No winning player yet, the game is still going on.")
-        for player in g.players:
+        for player in state.players():
             if player.is_alive():
                 return player
+        raise Exception("Game is over, but none of the players are alive.")
     

@@ -5,7 +5,10 @@ Authors: Luca Bianchi
          Tom MacArthur
 """
 
-from chopsticks.player import Human, Move
+from __future__ import annotations
+from chopsticks.player import Human, Player, Hand
+from chopsticks.move import Move, Hit, Split
+from chopsticks.state import State
 from abc import ABC, abstractmethod
 
 class Ui(ABC):
@@ -14,19 +17,19 @@ class Ui(ABC):
         pass
 
     @abstractmethod
-    def display_game_state(self, g):
+    def display_game_state(self, state: State):
         pass
 
     @abstractmethod
-    def get_user_input(self, g, player_id):
+    def get_user_input(self, player_id: int) -> Move|str|None:
         pass
 
 class Gui(Ui):
     """Graphical user interface"""
-    def display_game_state(self, g):
+    def display_game_state(self, state: State):
         pass
 
-    def get_user_input(self, g, player_id):
+    def get_user_input(self, player_id: int) -> None:
         pass
 
 class CommandLine(Ui):
@@ -34,33 +37,35 @@ class CommandLine(Ui):
     def __init__(self):
         pass
     
-    def display_game_state(self, g):
+    def display_game_state(self, state: State):
         """Prints the number of fingers each player has"""
-        str_list = []
-        for player in g.players:
+        str_list: list[str] = []
+        player: Player
+        for player in state.players():
             if isinstance(player, Human):
                 str_list.append(f"Human {str(player.id)}: (")
             else:
                 str_list.append(f"{player}: (")
             
-            for hand in player.hands:
+            hand: Hand
+            for hand in player.hands():
                 str_list.append(" " + str(hand.alive_fingers) + " ")
                 
             str_list.append(")   |   ")
-        print(''.join(str_list))
+        print("\n" + ''.join(str_list))
     
-    def get_user_input(self, g, player_id):
+    def get_user_input(self, player_id: int) -> Move|str :
         """Gets the user input and returns the appropriate action or an error"""
         ui = input("Human " + str(player_id) + "'s turn: ")
         ui_list = ui.strip().lower().split()
         
         try:
-            if ui_list[0] in [Move.HIT,'hit']:
+            if ui_list[0] in [Hit.code, 'hit']:
                 #Input: Hit, PLayerBeingHit, GivingHand, ReceivingHand
-                return (Move.HIT,  int(ui_list[1]), int(ui_list[2]), int(ui_list[3]))
-            elif ui_list[0] in [Move.SPLIT,'split']:
+                return Hit(int(ui_list[1]), int(ui_list[2]), int(ui_list[3]))
+            elif ui_list[0] in [Split.code,'split']:
                 #Input: Split, Hand1, Hand2, Amount1, Amount2
-                return (Move.SPLIT, int(ui_list[1]), int(ui_list[2]), int(ui_list[3]), int(ui_list[4]))
+                return Split(int(ui_list[1]), int(ui_list[2]), int(ui_list[3]), int(ui_list[4]))
             elif ui_list[0] == "help":
                 return "help"
             else:

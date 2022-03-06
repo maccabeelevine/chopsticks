@@ -5,68 +5,76 @@ Authors: Luca Bianchi
          Tom MacArthur
 """
 
+from __future__ import annotations
 from abc import ABC, abstractmethod
 
-class Move:
-    HIT = "h"
-    SPLIT = "s"
+from typing import TYPE_CHECKING, cast
+if TYPE_CHECKING:
+    from chopsticks.core import Game
+    from chopsticks.move import Move
+    from chopsticks.state import State
+
 
 class Hand:
     """
     Class representing the hand of a player
     """
-    def __init__(self, num_fingers):
+    def __init__(self, num_fingers: int):
         self.total_fingers = num_fingers
         self.alive_fingers = 1
         
-    def remove_fingers(self, num_fingers):
+    def remove_fingers(self, num_fingers: int):
         """Removes fingers from the hands"""
         if self.alive_fingers - num_fingers >= 0:
             self.alive_fingers = self.alive_fingers - num_fingers
             return True
     
-    def add_fingers(self, move_type, num_fingers):
+    def add_fingers(self, num_fingers: int):
         """
         Adds alive fingers to the hand
         
         Parameters
         ----------
-        move_type: string
-            Either "h" or "s"
         num_fingers: int
             Number of fingers to add
         """
-        if (move_type == Move.HIT and self.alive_fingers == 0) or num_fingers == 0:
-            return False
-
         self.alive_fingers = (self.alive_fingers + num_fingers) % self.total_fingers
         return True
 
     def is_alive(self):
         return self.alive_fingers
 
+    def __repr__(self):
+        return f"{self.alive_fingers}"
+
 class Player(ABC):
 
     """Abstract class for players in the game"""
-    def __init__(self, id, num_hands, num_fingers):
+    def __init__(self, id: int, num_hands: int, num_fingers: int):
         self.id = id
-        self.hands = [Hand(num_fingers) for x in range(num_hands)]
+        self._hands = [Hand(num_fingers) for _ in range(num_hands)]
     
+    def hand(self, hand_id: int):
+        return self._hands[hand_id - 1]
+
+    def hands(self):
+        return self._hands
+
     @abstractmethod
-    def get_next_move(self,g):
+    def get_next_move(self, g: Game, state: State) -> Move:
         """Gets the next move"""
         pass
 
     def get_alive_hands(self):
-        alive_hands = []
-        for hand in self.hands:
+        alive_hands: list[Hand] = []
+        for hand in self._hands:
             if hand.is_alive():
                 alive_hands.append(hand)
         return alive_hands
 
     def get_alive_fingers(self):
         alive_fingers = 0
-        for hand in self.hands:
+        for hand in self._hands:
             alive_fingers += hand.alive_fingers
         return alive_fingers
 
@@ -76,15 +84,16 @@ class Player(ABC):
 
 class Human(Player):
     """Class for human players"""
-    def get_next_move(self,g):
+    def get_next_move(self, g: Game, state: State) -> Move:
         """Gets the next move from the player"""
         #TODO Check if move is valid
         is_error = True
+        move: Move|str|None = None
         while is_error:
-            move = g.ui.get_user_input(g, self.id) 
+            move = g.ui.get_user_input(self.id) 
             if move != "error" and move != "help":
                 is_error = False         
-        return move
+        return cast(Move, move)
 
     def __repr__(self):
         return f"Human({self.id})"
