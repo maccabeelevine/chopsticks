@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from chopsticks.move import Move
 
+STARTING_HANDS: list[list[int]]|None = None
 class Game:
     """
     Class for running one instance of a game
@@ -42,6 +43,13 @@ class Game:
         self.state = State(
             [self.build_player(index + 1, player_type, num_hands, num_fingers) 
                 for index, player_type in enumerate(player_types)])
+        
+        if STARTING_HANDS:
+            for player_index, player in enumerate(self.state.players()):
+                player_starting_hands = STARTING_HANDS[player_index]
+                for hand_index, hand in enumerate(player.hands()):
+                    hand.alive_fingers = player_starting_hands[hand_index]
+
         
         print(f"Players: {self.state.players()}" +
               "\nHands per Player: ", self.num_hands, "\nFingers per hand: ", self.num_fingers , "\n")
