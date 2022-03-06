@@ -118,6 +118,7 @@ class Tournament:
             g = Game(self.num_hands, self.num_fingers, self.player_types)
             g.play()
             self.record_win(g.logic.get_winning_player(g.state))
+            print("-----------------------------------------------\n\n")
         self.print_results()
 
     def record_win(self, player: Player):
