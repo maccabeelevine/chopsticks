@@ -132,8 +132,13 @@ class BotUtil:
                     results.add_neutral_move(move)
                     continue
 
-        BotUtil.print_r(f"considered all moves, nothing found, returning neutral moves: {results.neutral_moves}", current_round)
-        return results
+        if is_my_turn:
+            BotUtil.print_r(f"considered all moves, nothing found, returning neutral moves: {results.neutral_moves}", current_round)
+            return results
+        else:
+            BotUtil.print_r("considered all opponent moves, nothing bad found", current_round)
+            return None
+
 
     @staticmethod
     def print_r(message: str, depth: int):
