@@ -28,6 +28,8 @@ class Scenario(State):
     def __init__(self, g: Game, starting_state: State, player_id: int, move: Move):
         self._initPlayers(starting_state)
         self._initOpponents(player_id)
+        self.move = move
+        self.player_id = player_id
         Logic.do_move(g, self, move, player_id)
 
     def _initPlayers(self, starting_state: State):

@@ -31,8 +31,8 @@ class RandomBot(Bot):
         move = random.choice(legal_moves)
         return move
 
-class AttackBot(Bot):
-    """ Bot that always hits if it will erase an opponent's hand. """
+class AttackNowBot(Bot):
+    """ Bot that always hits if it will erase an opponent's hand right now. """
 
     def get_next_move(self, g: Game, state: State):
         legal_moves = BotUtil.get_legal_moves(g, state, self.id)
@@ -59,13 +59,17 @@ class AttackBot(Bot):
         print("... No strategy move found, resorting to random.")
         return random.choice(legal_moves)
 
-class DefendBot(Bot):
-    """ Bot that always skips a move that could let the opponent erase one of it's hands. """
+class RecurseBot(Bot):
+    """ Abstract class that recurses to get the next move """
+
+    def __init__(self, id: int, num_hands: int, num_fingers: int, rounds: int):
+        super().__init__(id, num_hands, num_fingers)
+        self.rounds = rounds
 
     def get_next_move(self, g: Game, state: State):
         results = BotUtil.simulate(g=g, state=state, current_player_id=self.id, starting_state=state, 
-            starting_move=None, prior_move=None, optimizing_player_id=self.id, additional_rounds=2, current_round=1,
-            exit_test=DefendBot._exit_test)
+            starting_move=None, prior_move=None, optimizing_player_id=self.id, additional_rounds=self.rounds, 
+            current_round=1, exit_test=self._exit_test)
 
         if results:
             if results.success:
@@ -79,11 +83,48 @@ class DefendBot(Bot):
         legal_moves = BotUtil.get_legal_moves(g, state, self.id)
         return random.choice(legal_moves)
 
-    @staticmethod
-    def _exit_test(scenario: Scenario, additional_rounds: int, current_round: int, 
-        starting_state: State, optimizing_player_id: int) -> int:
+    @abstractmethod
+    def _exit_test(self, scenario: Scenario, additional_rounds: int, current_round: int, 
+        starting_state: State, prior_state: State|None, optimizing_player_id: int) -> int:
+        return cast(int, None)
 
-        before_alive_hands = starting_state.player(optimizing_player_id).get_alive_hands()
+class AttackBot(RecurseBot):
+    """ Bot that always hits if it will erase an opponent's hand within x moves. """
+
+    def _exit_test(self, scenario: Scenario, additional_rounds: int, current_round: int, 
+        starting_state: State, prior_state: State|None, optimizing_player_id: int) -> int:
+
+        if not scenario.player_id == optimizing_player_id:
+            return 0
+
+        if isinstance(scenario.move, Split):
+            return 0
+
+        prior_state = prior_state if prior_state else starting_state 
+
+        # determine opponent's starting number of alive hands
+        before_opponent = BotUtil.get_opponent(prior_state.players(), cast(Hit, scenario.move))
+        before_alive_hands = len(before_opponent.get_alive_hands())
+
+        # determine opponent's resulting number of alive hands
+        after_opponent = BotUtil.get_opponent(scenario.players(), cast(Hit, scenario.move))
+        after_alive_hands = len(after_opponent.get_alive_hands())
+
+        # see if they lost a hand
+        if after_alive_hands < before_alive_hands:
+            BotUtil.print_r("... Found strategy move", current_round)
+            return 1
+        else:
+            return 0
+
+class DefendBot(RecurseBot):
+    """ Bot that always skips a move that could let the opponent erase one of it's hands within x moves. """
+
+    def _exit_test(self, scenario: Scenario, additional_rounds: int, current_round: int, 
+        starting_state: State, prior_state: State|None, optimizing_player_id: int) -> int:
+
+        prior_state = prior_state if prior_state else starting_state 
+        before_alive_hands = prior_state.player(optimizing_player_id).get_alive_hands()
         after_alive_hands = scenario.player(optimizing_player_id).get_alive_hands()
         if len(after_alive_hands) < len(before_alive_hands):
             BotUtil.print_r(f"... rejecting due to hands {scenario.player(optimizing_player_id).hands()}", current_round)

@@ -72,7 +72,7 @@ class BotUtil:
     def simulate(g: Game, state: State, current_player_id: int, starting_state: State, 
         starting_move: Move|None,
         prior_move: Move|None, optimizing_player_id: int, additional_rounds: int, current_round: int,
-        exit_test: Callable[[Scenario, int, int, State, int], int]) -> SimulationResults|None:
+        exit_test: Callable[[Scenario, int, int, State, State, int], int]) -> SimulationResults|None:
         
         if not additional_rounds:
             BotUtil.print_r("no additional rounds on this tree", current_round)
@@ -84,7 +84,8 @@ class BotUtil:
         for move in legal_moves:
             scenario = Scenario(g, state, current_player_id, move)
             BotUtil.print_r(f"consider move {move} leading to scenario {scenario}", current_round)
-            test_result = exit_test(scenario, additional_rounds - 1, current_round, starting_state, optimizing_player_id)
+            test_result = exit_test(scenario, additional_rounds - 1, current_round, starting_state, 
+                state, optimizing_player_id)
 
             # for a good test result
             if test_result > 0:
