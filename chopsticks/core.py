@@ -7,7 +7,7 @@ Authors: Luca Bianchi
 Description: Core functionality module for the Chopsticks game. Contains the game class
 '''
 from __future__ import annotations
-from chopsticks.bots import RandomBot, AttackNowBot, AttackBot, DefendBot, AttackDefendBot
+from chopsticks.bots import RandomBot, AttackNowBot, AttackBot, DefendBot, AttackDefendBot, ThetaBot
 from chopsticks.user_interface import CommandLine
 from chopsticks.state import State
 import chopsticks.logic as logic
@@ -68,6 +68,8 @@ class Game:
                 return DefendBot(player_id, num_hands, num_fingers, 2)
             case 'ADB':
                 return AttackDefendBot(player_id, num_hands, num_fingers, 3)
+            case 'TB':
+                return ThetaBot(player_id, num_hands, num_fingers)
             case _:
                 raise Exception(f"Unknown player type: {player_type}")
     

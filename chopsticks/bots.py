@@ -8,6 +8,7 @@ from chopsticks.move import Split
 from chopsticks.bot_util import BotUtil
 from chopsticks.state import Scenario
 from chopsticks.move import Hit
+from chopsticks.rule import DontSplitIfResultHandIsVulnerable, Rule
 
 from typing import TYPE_CHECKING, cast
 if TYPE_CHECKING:
@@ -151,3 +152,68 @@ class AttackDefendBot(RecurseBot):
         else:
             return self.defend_bot.exit_test(scenario, additional_rounds, current_round, 
             starting_state, prior_state, optimizing_player_id)
+
+class RulesBot(Bot):
+    """ Bot that follows a set of rules. """
+
+    def __init__(self, id: int, num_hands: int, num_fingers: int):
+        super().__init__(id, num_hands, num_fingers)
+
+        self.next_low_score = -100
+        self.next_high_score = 100
+        self.rules: list[Rule] = []
+
+    def get_next_move(self, g: Game, state: State):
+        legal_moves = BotUtil.get_legal_moves(g, state, self.id)
+        good_moves: dict[Move, int] = {}
+        bad_moves: dict[Move, int] = {}
+        neutral_moves: list[Move] = []
+        for move in legal_moves:
+            print(f"testing move {move}")
+            found_matching_rule = False
+            for rule in self.rules:
+                print(f"... on rule {rule}")
+                score: int = rule.test(g, move, state, self.id)
+                if score > 0:
+                    good_moves[move] = score
+                    found_matching_rule = True
+                    break
+                elif score < 0:
+                    bad_moves[move] = score
+                    found_matching_rule = True
+                    break
+                else:
+                    # rule doesn't match this move
+                    pass
+            if not found_matching_rule:
+                neutral_moves.append(move)
+        if len(good_moves):
+            print(f"returning good move with highest score from {good_moves}")
+            return self.get_highest_score(good_moves)
+        elif len(neutral_moves):
+            print(f"returning neutral move from {neutral_moves}")
+            return random.choice(neutral_moves)
+        else:
+            print(f"returning bad move with highest score from {bad_moves}")
+            return self.get_highest_score(bad_moves)
+
+    def get_highest_score(self, moves: dict[Move, int]) -> Move:
+        highest_score = None
+        highest_score_move = None
+        for move in moves.keys():
+            score = moves[move]
+            if not highest_score or score > highest_score:
+                highest_score_move = move
+        return cast(Move, highest_score_move)
+
+    def get_next_low_score(self):
+        score = self.next_low_score
+        self.next_low_score += 1
+        return score
+
+class ThetaBot(RulesBot):
+
+    def __init__(self, id: int, num_hands: int, num_fingers: int):
+        super().__init__(id, num_hands, num_fingers)
+
+        self.rules.append(DontSplitIfResultHandIsVulnerable(self.get_next_low_score()))

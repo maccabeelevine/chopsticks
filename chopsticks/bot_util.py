@@ -172,3 +172,19 @@ class BotUtil:
 
         def add_neutral_move(self, neutral_move: Move):
             self.neutral_moves.append(neutral_move)
+
+    @staticmethod
+    def get_opponents(players: list[Player], player_id: int) -> list[Player]:
+        opponents: list[Player] = []
+        for player in players:
+            if not player.id == player_id:
+                opponents.append(player)
+        return opponents
+
+    @staticmethod
+    def has_vulnerable_hand(g: Game, player_1: Player, player_2: Player):
+        for player_1_hand in player_1.hands():
+            for player_2_hand in player_2.hands():
+                if player_1_hand.alive_fingers + player_2_hand.alive_fingers == g.num_fingers:
+                    return True
+        return False
