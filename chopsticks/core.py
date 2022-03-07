@@ -18,6 +18,11 @@ if TYPE_CHECKING:
     from chopsticks.move import Move
 
 STARTING_HANDS: list[list[int]]|None = None
+# Example:
+# STARTING_HANDS: list[list[int]]|None = [
+#     [1, 1], [0, 3]
+# ]
+
 class Game:
     """
     Class for running one instance of a game
