@@ -155,6 +155,10 @@ class BotUtil:
     def print_r(message: str, depth: int):
         print("..." * depth + " " + message)
 
+    @staticmethod
+    def print_t(message: str):
+        BotUtil.print_r(message, 2)
+
     class SimulationResults:
 
         def __init__(self):

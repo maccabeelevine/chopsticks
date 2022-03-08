@@ -8,7 +8,7 @@ from chopsticks.move import Split
 from chopsticks.bot_util import BotUtil
 from chopsticks.state import Scenario
 from chopsticks.move import Hit
-from chopsticks.rule import DontSplitIfResultHandIsVulnerable, Rule
+from chopsticks.rule import *
 
 from typing import TYPE_CHECKING, cast
 if TYPE_CHECKING:
@@ -177,16 +177,19 @@ class RulesBot(Bot):
                 if score > 0:
                     good_moves[move] = score
                     found_matching_rule = True
+                    BotUtil.print_t(f"Found good score {score} on rule {rule}")
                     break
                 elif score < 0:
                     bad_moves[move] = score
                     found_matching_rule = True
+                    BotUtil.print_t(f"Found bad score {score} on rule {rule}")
                     break
                 else:
                     # rule doesn't match this move
                     pass
             if not found_matching_rule:
                 neutral_moves.append(move)
+                print(f"... No match, neutral score")
         if len(good_moves):
             print(f"returning good move with highest score from {good_moves}")
             return self.get_highest_score(good_moves)
@@ -211,9 +214,15 @@ class RulesBot(Bot):
         self.next_low_score += 1
         return score
 
+    def get_next_high_score(self):
+        score = self.next_high_score
+        self.next_high_score -= 1
+        return score
+
 class ThetaBot(RulesBot):
 
     def __init__(self, id: int, num_hands: int, num_fingers: int):
         super().__init__(id, num_hands, num_fingers)
 
-        self.rules.append(DontSplitIfResultHandIsVulnerable(self.get_next_low_score()))
+        self.rules.append(HitIfItEndsTheGame(self.get_next_high_score()))
+        self.rules.append(DontSplitIfThenAHandIsVulnerable(self.get_next_low_score()))
