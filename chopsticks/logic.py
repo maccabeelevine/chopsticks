@@ -143,11 +143,14 @@ class Logic:
         return alive_count < 2
 
     @staticmethod
-    def get_winning_player(state: State) -> Player:
-        if not Logic.check_if_game_over(state):
-            raise Exception("No winning player yet, the game is still going on.")
+    def get_winning_player(state: State) -> Player|None:
+        alive_players: list[Player] = []
         for player in state.players():
             if player.is_alive():
-                return player
-        raise Exception("Game is over, but none of the players are alive.")
-    
+                alive_players.append(player)
+        if len(alive_players) == 1:
+            return alive_players[0]
+        else:
+            # Stalemate
+            return None
+        

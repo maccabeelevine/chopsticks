@@ -17,6 +17,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from chopsticks.move import Move
 
+STALEMATE_COUNT = 3
+
 STARTING_HANDS: list[list[int]]|None = None
 # Example:
 # STARTING_HANDS: list[list[int]]|None = [
@@ -44,6 +46,7 @@ class Game:
         self.game_is_over = False
         self.logic = logic.Logic()
         self.ui  = CommandLine()
+        self.prior_states: dict[State, int] = {}
         
         self.state = State(
             [self.build_player(index + 1, player_type, num_hands, num_fingers) 
@@ -87,6 +90,8 @@ class Game:
         while self.game_is_over == False:
             if self.player(i).is_alive():
                 self.ui.display_game_state(self.state)
+                if self.test_stalemate(self.state):
+                    break
                 if isinstance(self.player(i), Human):
                     is_valid_move = False
                     while is_valid_move == False:
@@ -106,7 +111,23 @@ class Game:
             if(i > self.num_players):
                 i=1
         
-        print(f"Game Over.  The winner is {self.logic.get_winning_player(self.state)}!\n\n")
+        if self.logic.check_if_game_over(self.state):
+            print(f"Game Over.  The winner is {self.logic.get_winning_player(self.state)}!\n\n")
+        else:
+            print(f"Game Over due to stalemate.\n\n")
+
+    def test_stalemate(self, state: State):
+        if not state in self.prior_states:
+            count = 1
+        else:
+            count = self.prior_states[state] + 1
+        self.prior_states[state] = count
+        if count == STALEMATE_COUNT:
+            print(f"Found the same state {count} times, declaring a stalemate")
+            return True
+        if count + 1 == STALEMATE_COUNT:
+            print("Warning, one more time at this state will be a stalemate")
+        return False
 
 
 class Tournament:
@@ -118,6 +139,7 @@ class Tournament:
         self.num_games = num_games
         self.player_types = player_types
         self.winners: dict[int, int] = {}
+        self.stalemates = 0
 
     def play(self):
         print(f"Starting a {self.num_games}-game tournament.")
@@ -128,18 +150,22 @@ class Tournament:
             print("-----------------------------------------------\n\n")
         self.print_results()
 
-    def record_win(self, player: Player):
-        if player.id not in self.winners:
-            self.winners[player.id] = 0
-        wins = self.winners[player.id]
-        wins += 1
-        self.winners[player.id] = wins
+    def record_win(self, player: Player|None):
+        if player:
+            if player.id not in self.winners:
+                self.winners[player.id] = 0
+            wins = self.winners[player.id]
+            wins += 1
+            self.winners[player.id] = wins
+        else:
+            self.stalemates += 1
 
     def print_results(self):
         def get_key(pair: tuple[int, int]):
             return pair[0]
         for player_id, wins in sorted(self.winners.items(), key = get_key):
             print(f"Player {player_id} won {wins} games.")
+        print(f"{self.stalemates} games ended in stalemate.")
         print("Any other players did not win any games.")
 
 
