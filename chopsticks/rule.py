@@ -55,3 +55,19 @@ class HitIfItEndsTheGame(Rule):
             return self.weight
         else:
             return 0
+
+class DontLeaveOneHandAndVulnerable(Rule):
+    """ Don't leave me with one hand, and it's vulnerable """
+
+    def test(self, g: Game, move: Move, state: State, current_player_id: int):
+        scenario = Scenario(g, state, current_player_id, move)
+        current_player = scenario.player(current_player_id)
+
+        if len(current_player.get_alive_hands()) > 1:
+            return 0
+
+        opponents = BotUtil.get_opponents(scenario.players(), current_player_id)
+        for opponent in opponents:
+            if BotUtil.has_vulnerable_hand(g, opponent, scenario.player(current_player_id)):
+                return self.weight
+        return 0

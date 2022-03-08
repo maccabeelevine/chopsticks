@@ -225,4 +225,5 @@ class ThetaBot(RulesBot):
         super().__init__(id, num_hands, num_fingers)
 
         self.rules.append(HitIfItEndsTheGame(self.get_next_high_score()))
+        self.rules.append(DontLeaveOneHandAndVulnerable(self.get_next_low_score()))
         self.rules.append(DontSplitIfThenAHandIsVulnerable(self.get_next_low_score()))
