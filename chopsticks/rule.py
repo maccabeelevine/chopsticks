@@ -51,7 +51,7 @@ class HitIfItEndsTheGame(Rule):
 
         scenario = Scenario(g, state, current_player_id, move)
         opponent = BotUtil.get_opponent(scenario.players(), move)
-        if not opponent.get_alive_fingers:
+        if not opponent.get_alive_fingers():
             return self.weight
         else:
             return 0
