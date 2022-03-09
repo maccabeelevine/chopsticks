@@ -40,6 +40,10 @@ class Game:
 
     """
     def __init__(self, num_hands: int, num_fingers: int, player_types: list[str]):
+        if num_hands > 9 or num_fingers > 9:
+            # due to State hashing function
+            raise Exception("num_hands and num_fingers must be single digits")
+
         self.num_players = len(player_types)
         self.num_hands = num_hands
         self.num_fingers = num_fingers
