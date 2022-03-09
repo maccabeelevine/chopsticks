@@ -19,6 +19,9 @@ class State:
     def players(self) -> list[Player]:
         return self._players
 
+    def set_current_player(self, current_player_id: int):
+        self._current_player_id = current_player_id
+
     def __repr__(self):
         return str([player.hands() for player in self.players()])
 
@@ -26,7 +29,7 @@ class State:
         return self.__hash__()
 
     def __hash__(self):
-        hash: int = 0
+        hash: int = self._current_player_id
         for player in self.players():
             for hand in player.hands():
                 hash = hash * 10

@@ -90,6 +90,7 @@ class Game:
         rounds_played = 0
         while self.game_is_over == False:
             if self.player(i).is_alive():
+                self.state.set_current_player(i)
                 self.ui.display_game_state(self.state)
                 if self.test_stalemate(self.state):
                     break
