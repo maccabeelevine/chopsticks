@@ -31,7 +31,6 @@ class State:
             for hand in player.hands():
                 hash = hash * 10
                 hash = hash + hand.alive_fingers
-        print(f"got hash {hash} from state {self}")
         return hash
 
 
