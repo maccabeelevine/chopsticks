@@ -2,6 +2,7 @@ from __future__ import annotations
 from chopsticks.move import Move, Hit, Split
 
 from typing import TYPE_CHECKING, cast, Callable
+import random
 from state import Scenario
 if TYPE_CHECKING:
     from chopsticks.core import Game
@@ -112,9 +113,11 @@ class BotUtil:
                 moves_to_recurse[move] = scenario
                 continue
 
-        # did a breadth-first search at this level and did not return, so now recurse
+        # did a breadth-first search at this level and did not return, 
+        # so now recurse on the saved neutral moves in random order
         BotUtil.print_r(f"recurse on stored neutral moves", current_round)
-        for move in moves_to_recurse.keys():
+        shuffled_moves = random.sample(moves_to_recurse.keys(), len(moves_to_recurse))
+        for move in shuffled_moves:
             next_player_id = 1 if current_player_id == g.num_players else current_player_id + 1
             scenario = moves_to_recurse[move]
             BotUtil.print_r(f"recurse on move {move} leading to scenario {scenario}", current_round)
