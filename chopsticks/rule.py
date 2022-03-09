@@ -35,10 +35,8 @@ class DontSplitIfThenAHandIsVulnerable(Rule):
         if not isinstance(move, Split):
             return 0
 
-        opponents = BotUtil.get_opponents(scenario.players(), current_player_id)
-        for opponent in opponents:
-            if BotUtil.has_vulnerable_hand(g, opponent, scenario.player(current_player_id)):
-                return self.weight
+        if BotUtil.is_vulnerable(current_player_id, scenario, g):
+            return self.weight
         return 0
 
 class HitIfItEndsTheGame(Rule):
@@ -63,8 +61,6 @@ class DontLeaveOneHandAndVulnerable(Rule):
         if len(current_player.get_alive_hands()) > 1:
             return 0
 
-        opponents = BotUtil.get_opponents(scenario.players(), current_player_id)
-        for opponent in opponents:
-            if BotUtil.has_vulnerable_hand(g, opponent, scenario.player(current_player_id)):
-                return self.weight
+        if BotUtil.is_vulnerable(current_player_id, scenario, g):
+            return self.weight
         return 0

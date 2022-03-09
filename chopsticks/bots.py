@@ -86,14 +86,14 @@ class RecurseBot(Bot):
 
     @abstractmethod
     def exit_test(self, scenario: Scenario, additional_rounds: int, current_round: int, 
-        starting_state: State, prior_state: State|None, optimizing_player_id: int) -> int:
+        starting_state: State, prior_state: State|None, optimizing_player_id: int, g: Game) -> int:
         return cast(int, None)
 
 class AttackBot(RecurseBot):
     """ Bot that always hits if it will erase an opponent's hand within x moves. """
 
     def exit_test(self, scenario: Scenario, additional_rounds: int, current_round: int, 
-        starting_state: State, prior_state: State|None, optimizing_player_id: int) -> int:
+        starting_state: State, prior_state: State|None, optimizing_player_id: int, g: Game) -> int:
 
         if not scenario.player_id == optimizing_player_id:
             return 0
@@ -122,13 +122,15 @@ class DefendBot(RecurseBot):
     """ Bot that always skips a move that could let the opponent erase one of it's hands within x moves. """
 
     def exit_test(self, scenario: Scenario, additional_rounds: int, current_round: int, 
-        starting_state: State, prior_state: State|None, optimizing_player_id: int) -> int:
+        starting_state: State, prior_state: State|None, optimizing_player_id: int, g: Game) -> int:
 
         prior_state = prior_state if prior_state else starting_state 
         before_alive_hands = prior_state.player(optimizing_player_id).get_alive_hands()
         after_alive_hands = scenario.player(optimizing_player_id).get_alive_hands()
         if len(after_alive_hands) < len(before_alive_hands):
             BotUtil.print_r(f"... rejecting due to hands {scenario.player(optimizing_player_id).hands()}", current_round)
+            return -1
+        elif BotUtil.is_vulnerable(optimizing_player_id, scenario, g):
             return -1
         else:
             return 0
@@ -146,12 +148,13 @@ class AttackDefendBot(RecurseBot):
 
         # try attack test first.  if it doesn't succeed, use defend test.
         attack_result = self.attack_bot.exit_test(scenario, additional_rounds, current_round, 
-            starting_state, prior_state, optimizing_player_id)
+            starting_state, prior_state, optimizing_player_id, g)
         if attack_result:
             return attack_result
         else:
             return self.defend_bot.exit_test(scenario, additional_rounds, current_round, 
-            starting_state, prior_state, optimizing_player_id)
+            starting_state, prior_state, optimizing_player_id, g)
+
 
 class RulesBot(Bot):
     """ Bot that follows a set of rules. """

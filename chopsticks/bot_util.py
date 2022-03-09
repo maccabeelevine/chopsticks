@@ -72,7 +72,7 @@ class BotUtil:
     def simulate(g: Game, state: State, current_player_id: int, starting_state: State, 
         starting_move: Move|None,
         prior_move: Move|None, optimizing_player_id: int, additional_rounds: int, current_round: int,
-        exit_test: Callable[[Scenario, int, int, State, State, int], int]) -> SimulationResults|None:
+        exit_test: Callable[[Scenario, int, int, State, State, int, Game], int]) -> SimulationResults|None:
         
         if not additional_rounds:
             BotUtil.print_r("no additional rounds on this tree", current_round)
@@ -86,7 +86,7 @@ class BotUtil:
             scenario = Scenario(g, state, current_player_id, move)
             BotUtil.print_r(f"consider move {move} leading to scenario {scenario}", current_round)
             test_result = exit_test(scenario, additional_rounds - 1, current_round, starting_state, 
-                state, optimizing_player_id)
+                state, optimizing_player_id, g)
 
             # for a good test result
             if test_result > 0:
@@ -176,6 +176,14 @@ class BotUtil:
 
         def add_neutral_move(self, neutral_move: Move):
             self.neutral_moves.append(neutral_move)
+
+    @staticmethod
+    def is_vulnerable(current_player_id: int, scenario: Scenario, g: Game):
+        opponents = BotUtil.get_opponents(scenario.players(), current_player_id)
+        for opponent in opponents:
+            if BotUtil.has_vulnerable_hand(g, opponent, scenario.player(current_player_id)):
+                return True
+        return False
 
     @staticmethod
     def get_opponents(players: list[Player], player_id: int) -> list[Player]:
