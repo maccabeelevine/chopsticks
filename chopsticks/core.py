@@ -75,7 +75,7 @@ class Game:
             case 'DB':
                 return DefendBot(player_id, num_hands, num_fingers, 2)
             case 'ADB':
-                return AttackDefendBot(player_id, num_hands, num_fingers, 3)
+                return AttackDefendBot(player_id, num_hands, num_fingers, 10)
             case 'TB':
                 return ThetaBot(player_id, num_hands, num_fingers)
             case _:
