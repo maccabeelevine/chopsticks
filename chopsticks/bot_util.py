@@ -71,8 +71,11 @@ class BotUtil:
 
                 right_fingers = player_alive_fingers - left_fingers
                 if not right_fingers > max_hand_fingers:
-                    move = Split(1, 2, left_fingers, right_fingers)
-                    legal_split_moves.append(move)
+
+                    # eliminate duplicate half of the legal splits
+                    if not left_fingers < right_fingers:
+                        move = Split(1, 2, left_fingers, right_fingers)
+                        legal_split_moves.append(move)
 
         return legal_split_moves
 
