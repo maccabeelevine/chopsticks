@@ -146,7 +146,8 @@ class Tournament:
 
     def play(self):
         print(f"Starting a {self.num_games}-game tournament.")
-        for _ in range(self.num_games):
+        for game_number in range(self.num_games):
+            print(f"Starting Game #{game_number + 1} of {self.num_games}.")
             g = Game(self.num_hands, self.num_fingers, self.player_types)
             g.play()
             self.record_win(g.logic.get_winning_player(g.state))
