@@ -29,12 +29,27 @@ class BotUtil:
             if not opponent_id == player_id:
 
                 # iterate through any of my hands that are alive
+                my_hand_unique: set[int] = set()
                 for my_hand in range(1, g.num_hands + 1):
                     if state.player(player_id).hand(my_hand).is_alive():
+                        my_alive_fingers = state.player(player_id).hand(my_hand).alive_fingers
+                        if my_alive_fingers in my_hand_unique:
+                            # skip hand with duplicate number of fingers
+                            continue
+                        else:
+                            my_hand_unique.add(my_alive_fingers)
 
                         # iterate through opponent hands that are alive
+                        opponent_hand_unique: set[int] = set()
                         for opponent_hand in range(1, g.num_hands + 1):
                             if g.player(opponent_id).hand(opponent_hand).is_alive():
+                                opponent_alive_fingers = state.player(opponent_id).hand(opponent_hand).alive_fingers
+                                if opponent_alive_fingers in opponent_hand_unique:
+                                    # skip opponent hand with duplicate number of fingers
+                                    continue
+                                else:
+                                    opponent_hand_unique.add(opponent_alive_fingers)
+
                                 move = Hit(opponent_id, my_hand, opponent_hand)
                                 legal_hit_moves.append(move)
 
