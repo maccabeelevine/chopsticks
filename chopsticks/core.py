@@ -87,6 +87,7 @@ class Game:
     def play(self):
         """Game Loop"""
         i = 1
+        rounds_played = 0
         while self.game_is_over == False:
             if self.player(i).is_alive():
                 self.ui.display_game_state(self.state)
@@ -106,15 +107,17 @@ class Game:
                     if not is_valid_move:
                         raise Exception(f"Bot returned invalid move: {move}")
                     
+            rounds_played += 1
             self.game_is_over = self.logic.check_if_game_over(self.state)
             i+=1
             if(i > self.num_players):
                 i=1
         
         if self.logic.check_if_game_over(self.state):
-            print(f"Game Over.  The winner is {self.logic.get_winning_player(self.state)}!\n\n")
+            print(f"Game Over after {rounds_played} rounds played.  " \
+                f"The winner is {self.logic.get_winning_player(self.state)}!\n\n")
         else:
-            print(f"Game Over due to stalemate.\n\n")
+            print(f"Game Over after {rounds_played} rounds played due to stalemate.\n\n")
 
     def test_stalemate(self, state: State):
         if not state.key() in self.prior_states:
