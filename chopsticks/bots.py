@@ -169,11 +169,12 @@ class RulesBot(Bot):
         bad_moves: dict[Move, int] = {}
         neutral_moves: list[Move] = []
         for move in legal_moves:
-            print(f"testing move {move}")
+            scenario = Scenario(g, state, self.id, move)
+            print(f"testing move {move} resulting in scenario {scenario}")
             found_matching_rule = False
             for rule in self.rules:
                 print(f"... on rule {rule}")
-                score: int = rule.test(g, move, state, self.id)
+                score: int = rule.test(g, move, scenario, state, self.id)
                 if score > 0:
                     good_moves[move] = score
                     found_matching_rule = True

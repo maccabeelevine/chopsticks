@@ -25,17 +25,16 @@ class Rule:
         return self.name
 
     @abstractmethod
-    def test(self, g: Game, move: Move, state: State, current_player_id: int) -> int:
+    def test(self, g: Game, move: Move, scenario: Scenario, prior_state: State, current_player_id: int) -> int:
         return 0
 
 class DontSplitIfThenAHandIsVulnerable(Rule):
     """ Don't split because value of each hand after splitting is vulnerable to being zeroed by one of opponent's hands. """
 
-    def test(self, g: Game, move: Move, state: State, current_player_id: int):
+    def test(self, g: Game, move: Move, scenario: Scenario, prior_state: State, current_player_id: int):
         if not isinstance(move, Split):
             return 0
 
-        scenario = Scenario(g, state, current_player_id, move)
         opponents = BotUtil.get_opponents(scenario.players(), current_player_id)
         for opponent in opponents:
             if BotUtil.has_vulnerable_hand(g, opponent, scenario.player(current_player_id)):
@@ -45,11 +44,10 @@ class DontSplitIfThenAHandIsVulnerable(Rule):
 class HitIfItEndsTheGame(Rule):
     """ Hit if it ends the game"""
 
-    def test(self, g: Game, move: Move, state: State, current_player_id: int):
+    def test(self, g: Game, move: Move, scenario: Scenario, prior_state: State, current_player_id: int):
         if not isinstance(move, Hit):
             return 0
 
-        scenario = Scenario(g, state, current_player_id, move)
         opponent = BotUtil.get_opponent(scenario.players(), move)
         if not opponent.get_alive_fingers():
             return self.weight
@@ -59,8 +57,7 @@ class HitIfItEndsTheGame(Rule):
 class DontLeaveOneHandAndVulnerable(Rule):
     """ Don't leave me with one hand, and it's vulnerable """
 
-    def test(self, g: Game, move: Move, state: State, current_player_id: int):
-        scenario = Scenario(g, state, current_player_id, move)
+    def test(self, g: Game, move: Move, scenario: Scenario, prior_state: State, current_player_id: int):
         current_player = scenario.player(current_player_id)
 
         if len(current_player.get_alive_hands()) > 1:
