@@ -144,15 +144,15 @@ class AttackDefendBot(RecurseBot):
         self.defend_bot = DefendBot(id=id, num_hands=num_hands, num_fingers=num_fingers, rounds=rounds)
 
     def exit_test(self, scenario: Scenario, additional_rounds: int, current_round: int, 
-        starting_state: State, prior_state: State|None, optimizing_player_id: int) -> int:
+        starting_state: State, prior_state: State|None, optimizing_player_id: int, g: Game) -> int:
 
-        # try attack test first.  if it doesn't succeed, use defend test.
-        attack_result = self.attack_bot.exit_test(scenario, additional_rounds, current_round, 
+        # prioritize defend over attack
+        defend_result = self.defend_bot.exit_test(scenario, additional_rounds, current_round, 
             starting_state, prior_state, optimizing_player_id, g)
-        if attack_result:
-            return attack_result
+        if defend_result:
+            return defend_result
         else:
-            return self.defend_bot.exit_test(scenario, additional_rounds, current_round, 
+            return self.attack_bot.exit_test(scenario, additional_rounds, current_round, 
             starting_state, prior_state, optimizing_player_id, g)
 
 
