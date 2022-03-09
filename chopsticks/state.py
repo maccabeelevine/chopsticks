@@ -22,6 +22,18 @@ class State:
     def __repr__(self):
         return str([player.hands() for player in self.players()])
 
+    def key(self):
+        return self.__hash__()
+
+    def __hash__(self):
+        hash: int = 0
+        for player in self.players():
+            for hand in player.hands():
+                hash = hash * 10
+                hash = hash + hand.alive_fingers
+        print(f"got hash {hash} from state {self}")
+        return hash
+
 
 class Scenario(State):
 

@@ -46,7 +46,7 @@ class Game:
         self.game_is_over = False
         self.logic = logic.Logic()
         self.ui  = CommandLine()
-        self.prior_states: dict[State, int] = {}
+        self.prior_states: dict[int, int] = {}
         
         self.state = State(
             [self.build_player(index + 1, player_type, num_hands, num_fingers) 
@@ -117,11 +117,11 @@ class Game:
             print(f"Game Over due to stalemate.\n\n")
 
     def test_stalemate(self, state: State):
-        if not state in self.prior_states:
+        if not state.key() in self.prior_states:
             count = 1
         else:
-            count = self.prior_states[state] + 1
-        self.prior_states[state] = count
+            count = self.prior_states[state.key()] + 1
+        self.prior_states[state.key()] = count
         if count == STALEMATE_COUNT:
             print(f"Found the same state {count} times, declaring a stalemate")
             return True
