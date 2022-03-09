@@ -51,6 +51,7 @@ class Game:
         self.logic = logic.Logic()
         self.ui  = CommandLine()
         self.prior_states: dict[int, int] = {}
+        self.rounds_played = 0
         
         self.state = State(
             [self.build_player(index + 1, player_type, num_hands, num_fingers) 
@@ -91,7 +92,6 @@ class Game:
     def play(self):
         """Game Loop"""
         i = 1
-        rounds_played = 0
         while self.game_is_over == False:
             if self.player(i).is_alive():
                 self.state.set_current_player(i)
@@ -112,17 +112,17 @@ class Game:
                     if not is_valid_move:
                         raise Exception(f"Bot returned invalid move: {move}")
                     
-            rounds_played += 1
+            self.rounds_played += 1
             self.game_is_over = self.logic.check_if_game_over(self.state)
             i+=1
             if(i > self.num_players):
                 i=1
         
         if self.logic.check_if_game_over(self.state):
-            print(f"Game Over after {rounds_played} rounds played.  " \
+            print(f"Game Over after {self.rounds_played} rounds played.  " \
                 f"The winner is {self.logic.get_winning_player(self.state)}!\n\n")
         else:
-            print(f"Game Over after {rounds_played} rounds played due to stalemate.\n\n")
+            print(f"Game Over after {self.rounds_played} rounds played due to stalemate.\n\n")
 
     def test_stalemate(self, state: State):
         if not state.key() in self.prior_states:
@@ -148,6 +148,7 @@ class Tournament:
         self.player_types = player_types
         self.winners: dict[int, int] = {}
         self.stalemates = 0
+        self.total_rounds_played = 0
 
     def play(self):
         print(f"Starting a {self.num_games}-game tournament.")
@@ -156,6 +157,7 @@ class Tournament:
             g = Game(self.num_hands, self.num_fingers, self.player_types)
             g.play()
             self.record_win(g.logic.get_winning_player(g.state))
+            self.total_rounds_played += g.rounds_played
             print("-----------------------------------------------\n\n")
         self.print_results()
 
@@ -176,6 +178,7 @@ class Tournament:
             print(f"Player {player_id} won {wins} games.")
         print(f"{self.stalemates} games ended in stalemate.")
         print("Any other players did not win any games.")
+        print(f"Games lasted for an average of {(self.total_rounds_played / self.num_games):.1f} rounds.")
 
 
 if __name__ == '__main__':
