@@ -52,7 +52,8 @@ class CommandLine(Ui):
                 str_list.append(" " + str(hand.alive_fingers) + " ")
                 
             str_list.append(")   |   ")
-        print("\n" + ''.join(str_list))
+        current_message = f"{state.get_current_player()}'s turn"
+        print("\n" + ''.join(str_list) + current_message)
     
     def get_user_input(self, player_id: int) -> Move|str :
         """Gets the user input and returns the appropriate action or an error"""

@@ -19,6 +19,9 @@ class State:
     def players(self) -> list[Player]:
         return self._players
 
+    def get_current_player(self):
+        return self.player(self._current_player_id)
+
     def set_current_player(self, current_player_id: int):
         self._current_player_id = current_player_id
 
