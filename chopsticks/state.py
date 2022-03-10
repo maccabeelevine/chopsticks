@@ -12,6 +12,7 @@ class State:
 
     def __init__(self, players: list[Player]):
         self._players = players
+        self.set_current_player(1)
 
     def player(self, player_id: int):
         return self._players[player_id - 1]

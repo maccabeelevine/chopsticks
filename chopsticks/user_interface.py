@@ -39,6 +39,9 @@ class CommandLine(Ui):
     
     def display_game_state(self, state: State):
         """Prints the number of fingers each player has"""
+        print(self.get_game_state(state))
+
+    def get_game_state(self, state: State):
         str_list: list[str] = []
         player: Player
         for player in state.players():
@@ -53,7 +56,7 @@ class CommandLine(Ui):
                 
             str_list.append(")   |   ")
         current_message = f"{state.get_current_player()}'s turn"
-        print("\n" + ''.join(str_list) + current_message)
+        return "\n" + ''.join(str_list) + current_message
     
     def get_user_input(self, player_id: int) -> Move|str :
         """Gets the user input and returns the appropriate action or an error"""

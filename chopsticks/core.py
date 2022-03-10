@@ -62,7 +62,6 @@ class Game:
                 player_starting_hands = STARTING_HANDS[player_index]
                 for hand_index, hand in enumerate(player.hands()):
                     hand.alive_fingers = player_starting_hands[hand_index]
-
         
         print(f"Players: {self.state.players()}" +
               "\nHands per Player: ", self.num_hands, "\nFingers per hand: ", self.num_fingers , "\n")
@@ -123,6 +122,38 @@ class Game:
                 f"The winner is {self.logic.get_winning_player(self.state)}!\n\n")
         else:
             print(f"Game Over after {self.rounds_played} rounds played due to stalemate.\n\n")
+
+    def play_async(self, move: Move):
+        i = self.state.get_current_player().id
+        if not self.game_is_over:
+            if self.player(i).is_alive():
+                self.state.set_current_player(i)
+                if self.test_stalemate(self.state):
+                    return "stalemate"
+                if isinstance(self.player(i), Human):
+                    is_valid_move = self.logic.do_move(self, self.state, move, i)
+                    if is_valid_move == False:
+                        return "Not A Valid Move"
+                else:
+                    move = self.player(i).get_next_move(self, self.state)    
+                    print(f"... {self.player(i)} selected move: {move}")
+                    is_valid_move = self.logic.do_move(self, self.state, move, i)
+                    if not is_valid_move:
+                        raise Exception(f"Bot returned invalid move: {move}")
+                    
+            self.rounds_played += 1
+            self.game_is_over = self.logic.check_if_game_over(self.state)
+            i+=1
+            if(i > self.num_players):
+                i=1
+            self.state.set_current_player(i)
+        
+        if self.logic.check_if_game_over(self.state):
+            return(f"Game Over after {self.rounds_played} rounds played.  " \
+                f"The winner is {self.logic.get_winning_player(self.state)}!\n\n")
+        else:
+            return(f"Game Over after {self.rounds_played} rounds played due to stalemate.\n\n")
+    
 
     def test_stalemate(self, state: State):
         if not state.key() in self.prior_states:
