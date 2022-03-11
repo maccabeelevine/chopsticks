@@ -2,6 +2,7 @@ from __future__ import annotations
 import copy
 from chopsticks.logic import Logic
 from typing import TYPE_CHECKING, cast
+import json
 if TYPE_CHECKING:
     from chopsticks.player import Player
     from chopsticks.move import Move
@@ -39,6 +40,10 @@ class State:
                 hash = hash * 10
                 hash = hash + hand.alive_fingers
         return hash
+
+    def to_json(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
 
 
 class Scenario(State):

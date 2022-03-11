@@ -14,7 +14,20 @@ Session(app)
 
 @app.route("/")  # type: ignore
 def hello():
+    g: Game|None = session.get('game')  # type: ignore
+    if not g:
+        g = Game(2, 5, ['H', 'RB'])
+        session['game'] = g
+
     return render_template("index.html")
+
+@app.route("/state")  #type: ignore
+def get_state():
+    g: Game = session.get('game')  # type: ignore
+    state = g.state
+    return {
+        "state": state.to_json(),
+    }
 
 @app.route('/play', defaults={'move_code': None})  # type: ignore
 @app.route("/play/<move_code>")  # type: ignore
