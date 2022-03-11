@@ -1,17 +1,20 @@
-from flask import Flask, session
+from flask import Flask, session, render_template
 from flask_session import Session  # type: ignore
 
 from chopsticks.core import Game
 from chopsticks.move import Move, Hit, Split
 
-app = Flask("Chopsticks Game")
+app = Flask("Chopsticks Game",
+            static_folder='chopsticks/web/static',
+            template_folder='chopsticks/web/templates')
+
 SESSION_TYPE = 'filesystem'
 app.config.from_object(__name__)
 Session(app)
 
 @app.route("/")  # type: ignore
 def hello():
-    return "hello"
+    return render_template("index.html")
 
 @app.route('/play', defaults={'move_code': None})  # type: ignore
 @app.route("/play/<move_code>")  # type: ignore
