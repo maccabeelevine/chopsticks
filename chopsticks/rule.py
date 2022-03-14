@@ -64,3 +64,11 @@ class DontLeaveOneHandAndVulnerable(Rule):
         if BotUtil.is_vulnerable(current_player_id, scenario, g):
             return self.weight
         return 0
+
+class DontLeaveAnyHandVulnerable(Rule):
+    """ Don't do any move if it leaves a hand vulnerable to being zeroed by one of opponent's hands. """
+
+    def test(self, g: Game, move: Move, scenario: Scenario, prior_state: State, current_player_id: int):
+        if BotUtil.is_vulnerable(current_player_id, scenario, g):
+            return self.weight
+        return 0
