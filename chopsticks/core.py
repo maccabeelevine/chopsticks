@@ -13,6 +13,7 @@ from chopsticks.state import State
 import chopsticks.logic as logic
 from chopsticks.player import Human, Player
 from chopsticks.move import Move
+from typing import cast
 
 STALEMATE_COUNT = 3
 
