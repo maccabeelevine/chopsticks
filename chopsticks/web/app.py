@@ -44,6 +44,12 @@ def play():
     else:
         return "Invalid Move", 400
 
+@app.route("/botMove", methods=['POST'])  #type: ignore
+def botMove():
+    g: Game = session.get('game')  # type: ignore
+    g.play_async(None)
+    return ""
+
 def _parse_move(move_code: str) -> Move:
     ui_list = move_code.strip().lower().split(',')
     

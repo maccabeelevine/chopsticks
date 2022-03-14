@@ -12,10 +12,7 @@ from chopsticks.user_interface import CommandLine
 from chopsticks.state import State
 import chopsticks.logic as logic
 from chopsticks.player import Human, Player
-
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from chopsticks.move import Move
+from chopsticks.move import Move
 
 STALEMATE_COUNT = 3
 
@@ -124,7 +121,7 @@ class Game:
         else:
             print(f"Game Over after {self.rounds_played} rounds played due to stalemate.\n\n")
 
-    def play_async(self, move: Move):
+    def play_async(self, move: Move|None):
         i = self.state.get_current_player().id
         if not self.game_is_over:
             if self.player(i).is_alive():
@@ -132,6 +129,7 @@ class Game:
                 if self.test_stalemate(self.state):
                     return "stalemate"
                 if isinstance(self.player(i), Human):
+                    move = cast(Move, move)
                     is_valid_move = self.logic.do_move(self, self.state, move, i)
                     if is_valid_move == False:
                         return "Not A Valid Move"

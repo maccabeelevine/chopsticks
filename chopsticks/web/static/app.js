@@ -45,6 +45,24 @@ function move(move) {
         "success": function(data, status, xhr) {
             console.log("success posting move");
             reloadState();
+            $("footer.status").text("ThetaBot is thinking...");
+            setTimeout(function() { 
+                botMove();
+            }, 5000);
+        },
+        "error": function(xhr, status, error) {
+            console.error("error", xhr);
+        }
+    });
+}
+
+function botMove() {
+    $.ajax({
+        "url": "/botMove",
+        "method": "POST",
+        "success": function(data, status, xhr) {
+            console.log("success requesting a bot move");
+            reloadState();
         },
         "error": function(xhr, status, error) {
             console.error("error", xhr);
