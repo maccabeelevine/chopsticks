@@ -1,4 +1,4 @@
-from flask import Flask, session, render_template
+from flask import Flask, request, session, render_template
 from flask_session import Session  # type: ignore
 
 from chopsticks.core import Game
@@ -27,24 +27,22 @@ def get_state():
     state = g.state
     return {
         "state": state.to_json(),
+        "last_move": g.last_move.to_json() if g.last_move else None,
     }
 
-@app.route('/play', defaults={'move_code': None})  # type: ignore
-@app.route("/play/<move_code>")  # type: ignore
-def play(move_code: str):
-    g: Game|None = session.get('game')  # type: ignore
-    if not g:
-        g = Game(2, 5, ['H', 'RB'])
-        session['game'] = g
-
-    content: str = g.ui.get_game_state(g.state)
+@app.route("/move", methods=['POST'])  # type: ignore
+def play():
+    g: Game = session.get('game')  # type: ignore
+    move_code = request.data.decode("utf-8") 
     if move_code:
         move: Move = _parse_move(move_code)
-        content += f"<br/>you moved: {move}"
         g.play_async(move)
-        content += f"<br/>Now:<br/>{g.ui.get_game_state(g.state)}"
-
-    return content
+        return {
+            "last_move": move.to_json(),
+        }
+        
+    else:
+        return "Invalid Move", 400
 
 def _parse_move(move_code: str) -> Move:
     ui_list = move_code.strip().lower().split(',')

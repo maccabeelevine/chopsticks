@@ -52,6 +52,7 @@ class Game:
         self.ui  = CommandLine()
         self.prior_states: dict[int, int] = {}
         self.rounds_played = 0
+        self.last_move = None
         
         self.state = State(
             [self.build_player(index + 1, player_type, num_hands, num_fingers) 
@@ -146,6 +147,7 @@ class Game:
             i+=1
             if(i > self.num_players):
                 i=1
+            self.last_move = move
             self.state.set_current_player(i)
         
         if self.logic.check_if_game_over(self.state):
