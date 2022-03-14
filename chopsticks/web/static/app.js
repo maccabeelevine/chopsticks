@@ -68,6 +68,7 @@ function updatePage(state, last_move) {
     updatePlayer($(".human"), state._players[0]);
     updatePlayer($(".bot"), state._players[1]);
     updateLastMove(last_move);
+    updateButtons(state._players[0]);
 }
 
 function updatePlayer(sectionElement, player) {
@@ -87,4 +88,15 @@ function updateLastMove(last_move) {
     else {
         $("footer.status").text("Last move: " + last_move);
     }
+}
+
+function updateButtons(player) {
+    let my_total_fingers = player._hands[0].alive_fingers + 
+        player._hands[1].alive_fingers;
+    $(".split_actions button").each(function(index, element) {
+        let left = $(element).data("left");
+        let move_type = $(element).data("move");
+        move_type = move_type.substr(0, 8) + String(my_total_fingers - left); 
+        $(element).data("move", move_type);
+    });
 }
