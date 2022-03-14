@@ -24,16 +24,10 @@ function reloadState() {
 }
 
 function initListeners() {
-    $(".player_left .hit_left").on("click", function() {
-        hit(2, 1, 1);
+    $(".actions button").on("click", function() {
+        let move_type = $(this).data("move");
+        move(move_type);
     });
-    $(".player_left .hit_right").on("click", function() {
-        hit(2, 1, 2);
-    });
-}
-
-function hit(target, source_hand, target_hand) {
-    move(['h', target, source_hand, target_hand].join());
 }
 
 function move(move) {
