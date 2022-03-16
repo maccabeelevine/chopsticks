@@ -123,3 +123,15 @@ class DontSplitAndLeaveOneHandZero(Rule):
             return self.weight
 
         return 0
+        
+class DontLeaveFewerTotalFingersThanOpponent(Rule):
+    """ Don't leave myself with fewer fingers than any opponent. """
+
+    def test(self, g: Game, move: Move, scenario: Scenario, prior_state: State, current_player_id: int):
+        total_fingers = scenario.get_current_player().get_alive_fingers()
+
+        for opponent in BotUtil.get_opponents(scenario.players(), current_player_id):
+            if opponent.get_alive_fingers() > total_fingers:
+                return self.weight
+
+        return 0
