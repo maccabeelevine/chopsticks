@@ -7,7 +7,7 @@ from state import Scenario
 if TYPE_CHECKING:
     from chopsticks.core import Game
     from chopsticks.state import State
-    from chopsticks.player import Player
+    from chopsticks.player import Player, Hand
 
 
 class BotUtil:
@@ -219,5 +219,14 @@ class BotUtil:
         for player_1_hand in player_1.hands():
             for player_2_hand in player_2.hands():
                 if player_1_hand.alive_fingers + player_2_hand.alive_fingers == g.num_fingers:
+                    return True
+        return False
+
+    @staticmethod
+    def is_vulnerable_hand(hand: Hand, current_player_id: int, scenario: Scenario, g: Game):
+        opponents = BotUtil.get_opponents(scenario.players(), current_player_id)
+        for opponent in opponents:
+            for opponent_hand in opponent.hands():
+                if hand.alive_fingers + opponent_hand.alive_fingers == g.num_fingers:
                     return True
         return False

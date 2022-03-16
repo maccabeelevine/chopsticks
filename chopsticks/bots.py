@@ -95,7 +95,7 @@ class AttackBot(RecurseBot):
     def exit_test(self, scenario: Scenario, additional_rounds: int, current_round: int, 
         starting_state: State, prior_state: State|None, optimizing_player_id: int, g: Game) -> int:
 
-        if not scenario.player_id == optimizing_player_id:
+        if not scenario.get_current_player().id == optimizing_player_id:
             return 0
 
         if isinstance(scenario.move, Split):
@@ -232,3 +232,4 @@ class ThetaBot(RulesBot):
         self.rules.append(DontLeaveOneHandAndVulnerable(self.get_next_low_score()))
         self.rules.append(DontSplitIfThenAHandIsVulnerable(self.get_next_low_score()))
         self.rules.append(DontLeaveAnyHandVulnerable(self.get_next_low_score()))
+        self.rules.append(DontSplitToVulnerableAndOne(self.get_next_low_score()))

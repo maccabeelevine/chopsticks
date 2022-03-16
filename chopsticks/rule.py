@@ -72,3 +72,16 @@ class DontLeaveAnyHandVulnerable(Rule):
         if BotUtil.is_vulnerable(current_player_id, scenario, g):
             return self.weight
         return 0
+
+class DontSplitToVulnerableAndOne(Rule):
+    """ Don't split to each hand either having one finger or being being vulnerable. """
+
+    def test(self, g: Game, move: Move, scenario: Scenario, prior_state: State, current_player_id: int):
+        if not isinstance(move, Split):
+            return 0
+
+        hands = scenario.get_current_player().hands()
+        for hand in hands:
+            if hand.alive_fingers > 1 and not BotUtil.is_vulnerable_hand(hand, current_player_id, scenario, g):
+                return 0
+        return self.weight
