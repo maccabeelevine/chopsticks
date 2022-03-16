@@ -210,6 +210,7 @@ class RulesBot(Bot):
         for move in moves.keys():
             score = moves[move]
             if not highest_score or score > highest_score:
+                highest_score = score
                 highest_score_move = move
         return cast(Move, highest_score_move)
 
