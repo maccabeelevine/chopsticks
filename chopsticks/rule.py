@@ -99,3 +99,15 @@ class If2DontHitToVulnerable(Rule):
         if BotUtil.is_vulnerable(current_player_id, scenario, g):
             return self.weight
         return 0
+
+class IfOneHandHasZeroHitsAreBad(Rule):
+    """ If one of my hands has zero fingers, then hit moves are bad because I'd still have zero fingers. """
+
+    def test(self, g: Game, move: Move, scenario: Scenario, prior_state: State, current_player_id: int):
+        if isinstance(move, Split):
+            return 0
+
+        if len(prior_state.get_current_player().get_alive_hands()) < g.num_hands:
+            return self.weight
+        
+        return 0
