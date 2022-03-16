@@ -111,3 +111,15 @@ class IfOneHandHasZeroHitsAreBad(Rule):
             return self.weight
         
         return 0
+
+class DontSplitAndLeaveOneHandZero(Rule):
+    """ Don't split and leave one hand with zero fingers. """
+
+    def test(self, g: Game, move: Move, scenario: Scenario, prior_state: State, current_player_id: int):
+        if isinstance(move, Hit):
+            return 0
+
+        if len(scenario.get_current_player().get_alive_hands()) < g.num_hands:
+            return self.weight
+
+        return 0
