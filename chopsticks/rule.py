@@ -85,3 +85,17 @@ class DontSplitToVulnerableAndOne(Rule):
             if hand.alive_fingers > 1 and not BotUtil.is_vulnerable_hand(hand, current_player_id, scenario, g):
                 return 0
         return self.weight
+
+class If2DontHitToVulnerable(Rule):
+    """ If my total fingers are two, don't hit in a way that makes a hand vulnerable. """
+
+    def test(self, g: Game, move: Move, scenario: Scenario, prior_state: State, current_player_id: int):
+        if not prior_state.get_current_player().get_alive_fingers() == 2:
+            return 0
+
+        if not isinstance(move, Hit):
+            return 0
+
+        if BotUtil.is_vulnerable(current_player_id, scenario, g):
+            return self.weight
+        return 0
