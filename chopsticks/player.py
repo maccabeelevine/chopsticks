@@ -7,11 +7,11 @@ Authors: Luca Bianchi
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
+from chopsticks.move import Move
 
 from typing import TYPE_CHECKING, cast
 if TYPE_CHECKING:
     from chopsticks.core import Game
-    from chopsticks.move import Move
     from chopsticks.state import State
 
 
