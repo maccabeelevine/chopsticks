@@ -16,7 +16,7 @@ Session(app)
 def hello():
     g: Game|None = session.get('game')  # type: ignore
     if not g:
-        g = Game(2, 5, ['H', 'RB'])
+        g = Game(2, 5, ['H', 'TB'])
         session['game'] = g
 
     return render_template("index.html")
@@ -44,7 +44,8 @@ def play():
     else:
         return "Invalid Move", 400
 
-@app.route("/botMove", methods=['POST'])  #type: ignore
+# @app.route("/botMove", methods=['POST'])  #type: ignore
+@app.route("/botMove")  #type: ignore
 def botMove():
     g: Game = session.get('game')  # type: ignore
     g.play_async(None)
@@ -65,5 +66,6 @@ def _parse_move(move_code: str) -> Move:
 
 @app.route("/reset") # type: ignore
 def reset():
-    del session['game']
+    if 'game' in session:
+        del session['game']
     return 'session deleted'
