@@ -2,7 +2,7 @@ from __future__ import annotations
 from abc import abstractmethod
 import re
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 from chopsticks.move import Hit, Move, Split
 from chopsticks.state import Scenario, State
 from chopsticks.bot_util import BotUtil
@@ -134,4 +134,18 @@ class DontLeaveFewerTotalFingersThanOpponent(Rule):
             if opponent.get_alive_fingers() > total_fingers:
                 return self.weight
 
+        return 0
+
+class HitIfItEliminatesAHand(Rule):
+    """ Hit an opponent's hand if it eliminates it. """
+
+    def test(self, g: Game, move: Move, scenario: Scenario, prior_state: State, current_player_id: int):
+        if isinstance(move, Split):
+            return 0
+        hit = cast(Hit, move)
+        opponent_id = hit.opponent_id
+        opponent_hand_id = hit.opponent_hand
+        if prior_state.player(opponent_id).hand(opponent_hand_id).is_alive() and \
+            not scenario.player(opponent_id).hand(opponent_hand_id).is_alive():
+            return self.weight
         return 0
