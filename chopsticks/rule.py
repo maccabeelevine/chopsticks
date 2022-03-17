@@ -149,3 +149,17 @@ class HitIfItEliminatesAHand(Rule):
             not scenario.player(opponent_id).hand(opponent_hand_id).is_alive():
             return self.weight
         return 0
+
+class HitIfOpponentHasOneFingerAndIHaveMore(Rule):
+    """ Hit if it leaves the opponent with one total finger, and me with more. """
+
+    def test(self, g: Game, move: Move, scenario: Scenario, prior_state: State, current_player_id: int):
+        if isinstance(move, Split):
+            return 0
+
+        opponent_id = cast(Hit, move).opponent_id
+        if scenario.player(opponent_id).get_alive_fingers() == 1 and \
+            scenario.get_current_player().get_alive_fingers() > 1:
+            return self.weight
+
+        return 0
