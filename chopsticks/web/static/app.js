@@ -42,7 +42,7 @@ function move(move) {
             $("footer.status").text("ThetaBot is thinking...");
             setTimeout(function() { 
                 botMove();
-            }, 5000);
+            }, 3000);
         },
         "error": function(xhr, status, error) {
             console.error("error", xhr);
