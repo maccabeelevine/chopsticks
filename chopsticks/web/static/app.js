@@ -8,6 +8,7 @@ function reloadState() {
     console.log("reloading state");
     $.ajax({
         "url": "/state",
+        "method": "GET",
         "success": function(data, status, xhr) {
             let state = $.parseJSON(data.state);
             console.log("state");
@@ -28,6 +29,10 @@ function initListeners() {
         let move_type = $(this).data("move");
         move(move_type);
     });
+
+    $("#restart_game").on("click", function() {
+        restartGame();
+    })
 }
 
 function move(move) {
@@ -86,7 +91,7 @@ function updateLastMove(last_move) {
         $("footer.status").text("Make the first move!");
     }
     else {
-        $("footer.status").text("Last move: " + last_move);
+        $("footer.status").text("Last move: " + JSON.stringify(last_move));
     }
 }
 
@@ -98,5 +103,19 @@ function updateButtons(player) {
         let move_type = $(element).data("move");
         move_type = move_type.substr(0, 8) + String(my_total_fingers - left); 
         $(element).data("move", move_type);
+    });
+}
+
+function restartGame() {
+    $.ajax({
+        "url": "/state",
+        "method": "DELETE",
+        "success": function(data, status, xhr) {
+            console.log("restarting game");
+            reloadState();
+        },
+        "error": function(xhr, status, error) {
+            console.error("error", xhr);
+        }
     });
 }

@@ -14,14 +14,16 @@ Session(app)
 
 @app.route("/")  # type: ignore
 def hello():
+    load_game()
+    return render_template("index.html")
+
+def load_game():
     g: Game|None = session.get('game')  # type: ignore
     if not g:
         g = Game(2, 5, ['H', 'TB'])
         session['game'] = g
 
-    return render_template("index.html")
-
-@app.route("/state")  #type: ignore
+@app.route("/state", methods=['GET'])  #type: ignore
 def get_state():
     g: Game = session.get('game')  # type: ignore
     state = g.state
@@ -29,6 +31,13 @@ def get_state():
         "state": state.to_json(),
         "last_move": g.last_move.to_json() if g.last_move else None,
     }
+
+@app.route("/state", methods=['DELETE']) # type: ignore
+def reset():
+    if 'game' in session:
+        del session['game']
+    load_game()
+    return 'session deleted'
 
 @app.route("/move", methods=['POST'])  # type: ignore
 def play():
@@ -61,10 +70,3 @@ def _parse_move(move_code: str) -> Move:
         return Split(int(ui_list[1]), int(ui_list[2]), int(ui_list[3]), int(ui_list[4]))
     else:
         raise Exception(f"unknown move type: {move_code}")
-
-
-@app.route("/reset") # type: ignore
-def reset():
-    if 'game' in session:
-        del session['game']
-    return 'session deleted'
