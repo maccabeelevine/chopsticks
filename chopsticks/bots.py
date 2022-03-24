@@ -79,6 +79,9 @@ class RecurseBot(Bot):
             elif results.neutral_moves:
                 print("... Only neutral moves found, choosing one of them.")
                 return random.choice(results.neutral_moves)
+            elif results.naive_neutral_moves:
+                print("... Only naive neutral moves found, choosing one of them.")
+                return random.choice(results.naive_neutral_moves)
 
         print("... No safe moves found, resorting to random.")
         legal_moves = BotUtil.get_legal_moves(g, state, self.id)

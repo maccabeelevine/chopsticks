@@ -129,6 +129,7 @@ class BotUtil:
             else:
                 BotUtil.print_r(f"found neutral move, so recurse later if needed", current_round)
                 moves_to_recurse[move] = scenario
+                results.add_naive_neutral_move(move)
                 continue
 
         # did a breadth-first search at this level and did not return, 
@@ -185,6 +186,7 @@ class BotUtil:
         def __init__(self):
             self.success = None
             self.neutral_moves: list[Move] = []
+            self.naive_neutral_moves: list[Move] = []
             self.failure = False
 
         def record_success(self, success: Move) -> BotUtil.SimulationResults:
@@ -197,6 +199,10 @@ class BotUtil:
 
         def add_neutral_move(self, neutral_move: Move):
             self.neutral_moves.append(neutral_move)
+
+        # a "naive" neutral move appears neutral at the current depth, without recursion
+        def add_naive_neutral_move(self, naive_neutral_move: Move):
+            self.naive_neutral_moves.append(naive_neutral_move)
 
     @staticmethod
     def is_vulnerable(current_player_id: int, scenario: Scenario, g: Game):
