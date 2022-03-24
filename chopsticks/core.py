@@ -13,6 +13,7 @@ from chopsticks.state import State
 import chopsticks.logic as logic
 from chopsticks.player import Human, Player
 from chopsticks.move import Move
+import random
 from typing import cast
 
 STALEMATE_COUNT = 3
@@ -89,7 +90,8 @@ class Game:
 
     def play(self):
         """Game Loop"""
-        i = 1
+        i = random.randint(1, self.num_players)
+        print(f"Starting Player is {self.player(i)}")
         while self.game_is_over == False:
             if self.player(i).is_alive():
                 self.state.set_current_player(i)
