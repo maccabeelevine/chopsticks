@@ -93,7 +93,7 @@ class RecurseBot(Bot):
         return cast(int, None)
 
 class AttackBot(RecurseBot):
-    """ Bot that always hits if it will erase an opponent's hand within x moves. """
+    """ Bot that always hits if it will erase an opponent's hand within 1 move. """
 
     def exit_test(self, scenario: Scenario, additional_rounds: int, current_round: int, 
         starting_state: State, prior_state: State|None, optimizing_player_id: int, g: Game) -> int:
